@@ -3,14 +3,14 @@ import 'package:shopping_app/Models/store_item.dart';
 
 class Store { 
 
-  int id;
+  String id;
   String name;
   String streetAddress;
   String city;
   String state;
   int zipCode;
-  List<StoreItem> items;
-  List<Review> reviews;
+  List<StoreItem> items = [];
+  List<Review> reviews = [];
 
   Store(
     {
@@ -20,8 +20,8 @@ class Store {
       this.city, 
       this.state, 
       this.zipCode,
-      this.items = const [],
-      this.reviews = const []
+      this.items,
+      this.reviews
     }
   );
 

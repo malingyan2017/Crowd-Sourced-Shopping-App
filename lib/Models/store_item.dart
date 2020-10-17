@@ -1,24 +1,29 @@
 import 'package:shopping_app/Models/item.dart';
 
-class StoreItem extends Item{
+class StoreItem extends Item {
 
+  String storeItemId;
   double price;
   bool onSale;
-  String lastUser;
+  String lastUserId;
   DateTime lastUpdate;
 
   StoreItem(
     {
+      String itemId,
       int barcode, 
       String name, 
       String pictureUrl,
+      List<String> tags,
+      this.storeItemId,
       this.price, 
       this.onSale, 
-      this.lastUser, 
+      this.lastUserId, 
       this.lastUpdate
     }
-  ) : super(barcode: barcode, name: name, pictureUrl: pictureUrl);
+  ) : super(itemId: itemId, barcode: barcode, name: name, pictureUrl: pictureUrl, tags: tags);
 
+  // For testing
   String print() {
 
     return ''' 
@@ -26,7 +31,7 @@ class StoreItem extends Item{
       name: $name,
       picture's url: $pictureUrl,
       price: $price,
-      last user to update: $lastUser,
+      last user to update: $lastUserId,
       last date of update: $lastUpdate
     ''';
   }

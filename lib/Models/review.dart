@@ -1,9 +1,10 @@
 class Review {
 
-  int id;
-  int userId;
+  String id;
+  String userId;
+  int rating;
   DateTime dateWritten;
-  String content;
+  String body;
 
-  Review({this.id, this.userId, this.dateWritten, this.content});
+  Review({this.id, this.userId, this.rating, this.dateWritten, this.body});
 }
