@@ -4,6 +4,7 @@ class TheUser {
   final String uid;
   final String username;
   final String userRank;
+  final int points;
   final String rankIconUrl;
   final int preferredLocation;
   final int preferredStoreId;
@@ -13,7 +14,8 @@ class TheUser {
     {
       this.uid, 
       this.username,
-      this.userRank, 
+      this.userRank,
+      this.points, 
       this.rankIconUrl, 
       this.preferredLocation, 
       this.preferredStoreId,
