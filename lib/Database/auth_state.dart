@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/the_user.dart';
 
