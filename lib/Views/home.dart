@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Database/auth_state.dart';
+import 'package:shopping_app/Views/search.dart';
 
 class Home extends StatelessWidget {
   final AuthService _auth = AuthService();
@@ -22,6 +23,13 @@ class Home extends StatelessWidget {
       ),
       body: Container(
         child: Text('to be implemented'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Search()));
+        },
+        child: Text('search'),
       ),
     );
   }
