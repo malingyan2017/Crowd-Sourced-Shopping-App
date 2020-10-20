@@ -46,7 +46,7 @@ class AuthService {
       User user = result.user;
 
       //create user data in data base with its uid when he register
-      await DatabaseService(uid: user.uid).updateUsers('new member', 0);
+      await DatabaseService(uid: user.uid).updateUsers('new member', 0, null);
       return _userFromUser(user);
     } catch (e) {
       print(e.toString());
