@@ -7,7 +7,6 @@ import 'livefeed_price_updates.dart';
 // Source: https://stackoverflow.com/questions/50609252/flutter-tabbar-without-appbar
 
 class Home extends StatelessWidget {
-  //const Home({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
