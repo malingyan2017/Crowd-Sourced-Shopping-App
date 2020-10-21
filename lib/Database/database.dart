@@ -7,6 +7,7 @@ import 'package:shopping_app/Models/item.dart';
 import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
+import 'package:shopping_app/Models/the_user.dart';
 
 class DatabaseService {
 
@@ -29,9 +30,32 @@ class DatabaseService {
   Future updateUsers(String username, int rank) async {
     return await userCollection.doc(uid).set({
       'username': username,
-      'rank': rank,
+      'rankPoints': rank,
     });
   }
+
+  String pointsToRank(int points) {
+
+    List<String> rankings = [];
+
+    return null; 
+  }
+
+  Future<TheUser> getUser() async {
+
+    DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
+    Map data = documentSnapshot.data();
+    
+    return TheUser(
+      uid: uid,
+      username: data['username'],
+      rankPoints: data['points'],
+      rankIconUrl: data['url'],
+      preferredLocation: data['preferredLocation'],
+      preferredStoreId: data['preferredStoreId']
+    );
+  }
+
 
   // Searches for items matching the keywords passed in.
   // Returns a Future list of QuerySnapshots.
@@ -70,19 +94,26 @@ class DatabaseService {
   // Error checking should be done to avoid calling this method if no 
   // information is changed by the user.
   // Will throw an exception if the update fails.
-  // Will do nothing if the price is null, or <= 0.
+  // Will do nothing if the price is <= 0.
   // https://firebase.flutter.dev/docs/firestore/usage/#updating-documents
-  Future<void> updateItemPrice ({@required StoreItem storeItem, @required double price}) async {
+  Future<void> updateItemPrice (
+    {@required StoreItem storeItem, @required String storeId, @required double price}) async {
 
-    if (price == null || price <= 0) {
+    if (price <= 0) {
 
       return;
     }
 
-    itemCollection.doc(storeItem.storeItemId)
+    // GRAB USER
+
+    fireStore
+    .collection(DatabaseConstants.stores)
+    .doc(storeId)
+    .collection(DatabaseConstants.storeItems)
+    .doc(storeItem.storeItemId)
     .update(
       {
-        'price': FieldValue.arrayUnion([storeItem])
+        'price': price
       }
     );
 
@@ -93,7 +124,8 @@ class DatabaseService {
   // Provides a user points for updating the tags.
   // Will throw an exception if the update fails.
   // Will do nothing if the tagToAdd string is empty or null
-  Future<void> updateItemTags({@required StoreItem storeItem, @required String tagToAdd}) async {
+  Future<void> updateItemTags(
+    {@required StoreItem storeItem, @required String tagToAdd}) async {
 
     if (tagToAdd == null || tagToAdd == '') {
 
