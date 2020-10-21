@@ -1,9 +1,13 @@
 import 'package:shopping_app/Models/shopping_list.dart';
 
 class TheUser {
+
+  static const List<String> rankings = 
+    ['Novice', 'Journeyman', 'Master'];
+
   final String uid;
   final String username;
-  final String userRank;
+  final int rankPoints;
   final String rankIconUrl;
   final int preferredLocation;
   final int preferredStoreId;
@@ -12,9 +16,24 @@ class TheUser {
   TheUser(
       {this.uid,
       this.username,
+<<<<<<< HEAD
       this.userRank,
       this.rankIconUrl,
       this.preferredLocation,
       this.preferredStoreId,
       this.shoppingList});
+=======
+      this.rankPoints, 
+      this.rankIconUrl, 
+      this.preferredLocation, 
+      this.preferredStoreId,
+      this.shoppingList
+    }
+  );
+
+  String get userRank {
+
+    return 'ADD LOGIC';
+  }
+>>>>>>> add_database_functions
 }
