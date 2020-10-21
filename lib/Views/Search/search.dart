@@ -45,7 +45,7 @@ class _SearchState extends State<Search> {
                 if (snapshot.hasError) {
                   return Text('Something went wrong');
                 }
-                print(snapshot.data);
+                print(snapshot.data.docs);
                 print(searchName);
 
                 if (snapshot == null) {
@@ -54,7 +54,7 @@ class _SearchState extends State<Search> {
 
                 return SizedBox(
                   height: 100,
-                  width: 200,
+                  width: 300,
                   child: ListView.builder(
                       itemCount: snapshot.data.docs.length,
                       itemBuilder: (context, index) {
@@ -65,8 +65,17 @@ class _SearchState extends State<Search> {
                             Card(
                               child: Row(
                                 children: <Widget>[
-                                  Expanded(
-                                    child: Image.network(data['pictureUrl']),
+                                  Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.rectangle,
+                                        image: DecorationImage(
+                                          image:
+                                              NetworkImage(data['pictureUrl']),
+                                          fit: BoxFit.fill,
+                                        )),
+                                    //child: Image.network(data['pictureUrl']),
                                   ),
                                   SizedBox(
                                     width: 10,
