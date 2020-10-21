@@ -10,14 +10,11 @@ class TheUser {
   ShoppingList shoppingList;
 
   TheUser(
-    {
-      this.uid, 
+      {this.uid,
       this.username,
-      this.userRank, 
-      this.rankIconUrl, 
-      this.preferredLocation, 
+      this.userRank,
+      this.rankIconUrl,
+      this.preferredLocation,
       this.preferredStoreId,
-      this.shoppingList
-    }
-  );
+      this.shoppingList});
 }

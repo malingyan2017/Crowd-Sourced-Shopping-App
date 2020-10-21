@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Models/the_user.dart';
-import 'package:shopping_app/Views/home.dart';
-import 'package:shopping_app/Views/authenticate.dart';
+import 'package:shopping_app/Views/Common/edit_location.dart';
+import 'package:shopping_app/Views/Common/edit_username.dart';
+import 'package:shopping_app/Views/Home/home_main.dart';
+import 'package:shopping_app/Views/Authentication/authenticate.dart';
+import 'package:shopping_app/Views/Common/base_app.dart';
 
 class Decider extends StatelessWidget {
   @override
@@ -17,7 +20,7 @@ class Decider extends StatelessWidget {
     if (user == null) {
       return Authenticate();
     } else {
-      return Home();
+      return BaseApp();
     }
   }
 }

@@ -8,10 +8,11 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('users');
 
   //create if not there or update the user data in data base
-  Future updateUsers(String username, int rank) async {
+  Future updateUsers(String username, int rank, String location) async {
     return await userCollection.doc(uid).set({
       'username': username,
       'rank': rank,
+      'location': location,
     });
   }
 }
