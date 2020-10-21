@@ -16,13 +16,6 @@ class TheUser {
   TheUser(
       {this.uid,
       this.username,
-<<<<<<< HEAD
-      this.userRank,
-      this.rankIconUrl,
-      this.preferredLocation,
-      this.preferredStoreId,
-      this.shoppingList});
-=======
       this.rankPoints, 
       this.rankIconUrl, 
       this.preferredLocation, 
@@ -35,5 +28,4 @@ class TheUser {
 
     return 'ADD LOGIC';
   }
->>>>>>> add_database_functions
 }

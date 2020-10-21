@@ -30,12 +30,8 @@ class DatabaseService {
   Future updateUsers(String username, int rank, String location) async {
     return await userCollection.doc(uid).set({
       'username': username,
-<<<<<<< HEAD
-      'rank': rank,
-      'location': location,
-=======
       'rankPoints': rank,
->>>>>>> add_database_functions
+      'location': location,
     });
   }
 
@@ -94,6 +90,7 @@ class DatabaseService {
     return itemCollection.where('tags', arrayContains: tag).get();
   }
 
+  /*
   // Updates a store item's price based on the information passed in.
   // Provides a user points for updating the price. 
   // Error checking should be done to avoid calling this method if no 
@@ -124,6 +121,7 @@ class DatabaseService {
 
     updateUserScore(DatabaseConstants.pointsForUpdatingPrice);
   } 
+  */
 
   // Adds tagToAdd to the tags associated with the passed in item.
   // Provides a user points for updating the tags.
