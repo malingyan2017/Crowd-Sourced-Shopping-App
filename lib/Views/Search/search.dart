@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+//https://morioh.com/p/3522d01c11ef
+
 class Search extends StatefulWidget {
   @override
   _SearchState createState() => _SearchState();
@@ -46,6 +48,7 @@ class _SearchState extends State<Search> {
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot data = snapshot.data.docs[index];
+                          //int quantity;
                           return Card(
                               child: Row(
                             children: [
