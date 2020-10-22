@@ -11,7 +11,6 @@ class _SearchState extends State<Search> {
 
   //variable for the drop down menu
   int quantity;
-
   @override
   Widget build(BuildContext context) {
     CollectionReference items = FirebaseFirestore.instance.collection('item');
@@ -34,101 +33,63 @@ class _SearchState extends State<Search> {
             },
           ),
         ),
-        Column(
-          children: <Widget>[
-            StreamBuilder<QuerySnapshot>(
+        Flexible(
+          child: StreamBuilder<QuerySnapshot>(
               //if no search, show 3 items, if there is search, show specific items found
               stream: (searchName != '' && searchName != null)
                   ? specificItems.snapshots()
                   : items.limit(3).snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Something went wrong');
-                }
-                print(snapshot.data.docs);
-                print(searchName);
-
-                if (snapshot == null) {
-                  return Text('Nothing matched here');
-                }
-
-                return SizedBox(
-                  height: 100,
-                  width: 300,
-                  child: ListView.builder(
-                      itemCount: snapshot.data.docs.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot data = snapshot.data.docs[index];
-
-                        return Column(
-                          children: [
-                            Card(
+                return (snapshot.connectionState == ConnectionState.waiting)
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: snapshot.data.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot data = snapshot.data.docs[index];
+                          return Card(
                               child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    width: 100,
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.rectangle,
-                                        image: DecorationImage(
-                                          image:
-                                              NetworkImage(data['pictureUrl']),
-                                          fit: BoxFit.fill,
-                                        )),
-                                    //child: Image.network(data['pictureUrl']),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('name: ${data['name']}'),
-                                      DropdownButton<int>(
-                                        hint: Text('quantity'),
-                                        value: quantity,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            quantity = value;
-                                          });
-                                        },
-                                        items: <int>[
-                                          1,
-                                          2,
-                                          3,
-                                          4,
-                                          5,
-                                          6,
-                                          7,
-                                          8,
-                                          9,
-                                          10
-                                        ].map<DropdownMenuItem<int>>(
-                                            (quantity) {
-                                          return DropdownMenuItem<int>(
-                                            child: Text(quantity.toString()),
-                                            value: quantity,
-                                          );
-                                        }).toList(),
-                                      ),
-                                      RaisedButton(
-                                        child: Text('add to cart'),
-                                        onPressed: () {},
-                                      )
-                                    ],
-                                  ),
-                                ],
+                            children: [
+                              Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image:
+                                            NetworkImage(data['pictureUrl']))),
                               ),
-                            ),
-                          ],
-                        );
-                      }),
-                );
-              },
-            )
-          ],
-        )
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Column(
+                                children: [
+                                  Text('name: ${data['name']}'),
+                                  DropdownButton<int>(
+                                    hint: Text('quantity'),
+                                    value: quantity,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        quantity = value;
+                                      });
+                                    },
+                                    items: <int>[1, 2, 3, 4, 5, 6, 7]
+                                        .map<DropdownMenuItem<int>>((quantity) {
+                                      return DropdownMenuItem<int>(
+                                        child: Text(quantity.toString()),
+                                        value: quantity,
+                                      );
+                                    }).toList(),
+                                  ),
+                                  RaisedButton(
+                                      child: Text('add to cart'),
+                                      onPressed: () {}),
+                                ],
+                              )
+                            ],
+                          ));
+                        },
+                      );
+              }),
+        ),
       ],
     );
   }
