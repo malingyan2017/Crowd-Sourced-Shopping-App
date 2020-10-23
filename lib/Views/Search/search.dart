@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shopping_app/Views/Search/dropDownButton.dart';
 
 //https://morioh.com/p/3522d01c11ef
 
@@ -11,11 +12,12 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   String searchName;
 
-  //variable for the drop down menu
-  int quantity;
   @override
   Widget build(BuildContext context) {
+    //items to show when there is no searchName found
     CollectionReference items = FirebaseFirestore.instance.collection('item');
+
+    //items to show when there is items matched to searchName
     Query specificItems = FirebaseFirestore.instance
         .collection('item')
         .where('tags', arrayContains: searchName);
@@ -38,6 +40,7 @@ class _SearchState extends State<Search> {
         Flexible(
           child: StreamBuilder<QuerySnapshot>(
               //if no search, show 3 items, if there is search, show specific items found
+
               stream: (searchName != '' && searchName != null)
                   ? specificItems.snapshots()
                   : items.limit(3).snapshots(),
@@ -48,7 +51,7 @@ class _SearchState extends State<Search> {
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot data = snapshot.data.docs[index];
-                          //int quantity;
+
                           return Card(
                               child: Row(
                             children: [
@@ -56,9 +59,10 @@ class _SearchState extends State<Search> {
                                 width: 60,
                                 height: 60,
                                 decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        image:
-                                            NetworkImage(data['pictureUrl']))),
+                                  image: DecorationImage(
+                                    image: NetworkImage(data['pictureUrl']),
+                                  ),
+                                ),
                               ),
                               SizedBox(
                                 width: 20,
@@ -66,22 +70,7 @@ class _SearchState extends State<Search> {
                               Column(
                                 children: [
                                   Text('name: ${data['name']}'),
-                                  DropdownButton<int>(
-                                    hint: Text('quantity'),
-                                    value: quantity,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        quantity = value;
-                                      });
-                                    },
-                                    items: <int>[1, 2, 3, 4, 5, 6, 7]
-                                        .map<DropdownMenuItem<int>>((quantity) {
-                                      return DropdownMenuItem<int>(
-                                        child: Text(quantity.toString()),
-                                        value: quantity,
-                                      );
-                                    }).toList(),
-                                  ),
+                                  MyDropDownButton(),
                                   RaisedButton(
                                       child: Text('add to cart'),
                                       onPressed: () {}),
