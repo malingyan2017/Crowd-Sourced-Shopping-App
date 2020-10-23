@@ -66,6 +66,7 @@ class _SearchState extends State<Search> {
                                 width: 20,
                               ),
                               Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('name: ${data['name']}'),
                                   MyDropDownButton(),
