@@ -13,7 +13,7 @@ class UpdateUser extends StatelessWidget {
     CollectionReference myUser = FirebaseFirestore.instance.collection('users');
     //where('uid', isEqualTo: auth.currentUser.uid);
     return Scaffold(
-      drawer: new SideDrawer(),
+      //drawer: new SideDrawer(),
       appBar: MyAppBar('Edit Username'),
       body: FutureBuilder<DocumentSnapshot>(
         future: myUser.doc(auth.currentUser.uid).get(),

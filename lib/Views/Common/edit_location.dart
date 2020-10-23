@@ -9,7 +9,7 @@ class UpdateLocation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: new SideDrawer(),
+      //drawer: new SideDrawer(),
       appBar: MyAppBar('Edit Location'),
     );
   }

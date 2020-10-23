@@ -42,21 +42,15 @@ class DatabaseService {
     return null; 
   }
 
-  Future<TheUser> getUser() async {
-
-    DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
-    Map data = documentSnapshot.data();
+  Future<DocumentSnapshot> getUserSnapshot() {
     
-    return TheUser(
-      uid: uid,
-      username: data['username'],
-      rankPoints: data['points'],
-      rankIconUrl: data['url'],
-      preferredLocation: data['preferredLocation'],
-      preferredStoreId: data['preferredStoreId']
-    );
+    return userCollection.doc(uid).get();
   }
 
+  Stream<DocumentSnapshot> getUserStream() {
+    
+    return userCollection.doc(uid).snapshots();
+  }
 
   // Searches for items matching the keywords passed in.
   // Returns a Future list of QuerySnapshots.

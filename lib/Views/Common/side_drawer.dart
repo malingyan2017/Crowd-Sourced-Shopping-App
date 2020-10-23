@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Views/Common/edit_location.dart';
 import 'package:flutter/src/material/colors.dart';
 import 'package:shopping_app/Views/Common/edit_username.dart';
@@ -9,17 +10,42 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class SideDrawer extends StatelessWidget {
   final AuthService _auth = AuthService();
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference myUser = FirebaseFirestore.instance.collection('users');
-    return new Drawer(
+    
+    //CollectionReference myUser = FirebaseFirestore.instance.collection('users');
+    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
+
+    Widget userStream = StreamBuilder(
+      stream: db.getUserStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text("Something went wrong");
+        }
+
+        if (snapshot.hasData) {
+          Map<String, dynamic> data = snapshot.data.data();
+          return Text(
+            'Username: ${data['username']}\nRank: ${data['rank']}\nLocation: -tbd-\n',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16.0,
+              height: 1.5,
+            ),
+          );
+        }
+        return Text("loading");
+      }
+    );
+
+    return new Drawer( 
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           Container(
-            height: 210,
+            height: MediaQuery.of(context).size.height * .30,
             child: DrawerHeader(
               margin: EdgeInsets.zero,
               padding: EdgeInsets.zero,
@@ -41,33 +67,11 @@ class SideDrawer extends StatelessWidget {
                     top: 75.0,
                     left: 16.0,
                     bottom: 10.0,
-                    child: FutureBuilder<DocumentSnapshot>(
-                      future: myUser.doc(auth.currentUser.uid).get(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<DocumentSnapshot> snapshot) {
-                        if (snapshot.hasError) {
-                          return Text("Something went wrong");
-                        }
-
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          Map<String, dynamic> data = snapshot.data.data();
-                          return Text(
-                            'Username: ${data['username']}\nRank: ${data['rank']}\nLocation: -tbd-\n',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 16.0,
-                              height: 1.5,
-                            ),
-                          );
-                        }
-
-                        return Text("loading");
-                      },
-                    ),
+                    child: userStream,
                   ),
                 ],
               ),
-            ),
+            )
           ),
           ListTile(
             title: Row(
