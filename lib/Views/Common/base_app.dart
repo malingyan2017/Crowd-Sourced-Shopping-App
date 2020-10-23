@@ -46,6 +46,7 @@ class _BaseAppState extends State<BaseApp> {
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
+      //resizeToAvoidBottomPadding: true,
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
             canvasColor: Colors.blue[200],
