@@ -42,7 +42,7 @@ class _SearchState extends State<Search> {
               //if no search, show 3 items, if there is search, show specific items found
               stream: (searchName != '' && searchName != null)
                   ? specificItems.snapshots()
-                  : items.limit(3).snapshots(),
+                  : items.limit(10).snapshots(),
               builder: (context, snapshot) {
                 return (snapshot.connectionState == ConnectionState.waiting)
                     ? Center(child: CircularProgressIndicator())
