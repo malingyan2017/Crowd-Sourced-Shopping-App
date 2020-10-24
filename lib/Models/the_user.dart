@@ -5,12 +5,12 @@ class TheUser {
   static const List<String> rankings = 
     ['Novice', 'Journeyman', 'Master'];
 
-  final String uid;
-  final String username;
-  final int rankPoints;
-  final String rankIconUrl;
-  final int preferredLocation;
-  final int preferredStoreId;
+  String uid;
+  String username;
+  int rankPoints;
+  String rankIconUrl;
+  int preferredLocation;
+  int preferredStoreId;
   ShoppingList shoppingList;
 
   TheUser(

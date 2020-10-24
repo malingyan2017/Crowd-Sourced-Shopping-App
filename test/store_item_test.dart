@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 import 'package:shopping_app/Models/store_item.dart';
 
 void main() {
-  int barcode = 123;
+  String barcode = '123';
   String name = 'test';
   String url = 'testurl';
   double price = 10.33;

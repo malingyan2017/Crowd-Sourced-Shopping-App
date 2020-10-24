@@ -44,6 +44,21 @@ class DatabaseService {
     });
   }
 
+  Future<bool> usernameExists(String username) async {
+
+    QuerySnapshot querySnapshot =  
+      await userCollection.where('username', isEqualTo: username).get();
+
+    return querySnapshot.size >= 1;
+  }
+
+  Future<void> updateUsername(String username) async {
+
+    userCollection.doc(uid).update({
+      'username': username
+    });
+  }
+
   String pointsToRank(int points) {
     List<String> rankings = [];
 

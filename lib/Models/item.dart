@@ -1,7 +1,7 @@
 class Item {
 
   String itemId;
-  int barcode;
+  String barcode;
   String name;
   String pictureUrl;
   List<String> tags = [];

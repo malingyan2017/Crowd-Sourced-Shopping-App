@@ -11,7 +11,7 @@ class StoreItem extends Item {
   StoreItem(
     {
       String itemId,
-      int barcode, 
+      String barcode, 
       String name, 
       String pictureUrl,
       List<String> tags,
