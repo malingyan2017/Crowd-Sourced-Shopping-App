@@ -25,6 +25,7 @@ class UpdateUser extends StatelessWidget {
       body: StreamBuilder<DocumentSnapshot>(
         stream: db.getUserStream(),
         builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+
           if (snapshot.hasError) {
             return Text("Something went wrong");
           }
@@ -34,11 +35,12 @@ class UpdateUser extends StatelessWidget {
             //return Text("Username: ${data['username']}");
             return _UsernameForm(data: data,);
           }
-
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
+          else {
+            return CenteredLoadingCircle(
+              height: Measure.screenHeightFraction(context, .2),
+              width: Measure.screenWidthFraction(context, .4),
+            );
+          }
         },
       ),
     );
@@ -133,36 +135,25 @@ class _UsernameFormState extends State<_UsernameForm> {
                 databaseErrorOccurred = false;
                 usernameTaken = false;
                 
-                //_formKey.currentState.
                 if (_formKey.currentState.validate()) {
+
                   usernameTaken = await db.usernameExists(usernameController.text);
-                  if (usernameTaken) {
-                    setState(() {
-                      previousUsername = usernameController.text;
-                    });
-                  }
-                  else {
+                  if (!usernameTaken) {
                     await db.updateUsername(usernameController.text)
                     .catchError( (error) {
-                      setState(() {
-                        previousUsername = usernameController.text;
-                        databaseErrorOccurred = true;
-                      });
+                      databaseErrorOccurred = true;
                     });
 
-                    // If we make it this far then we've managed to change
-                    // their username without issues
-                    setState(() {
-                      previousUsername = usernameController.text;
+                    if (!databaseErrorOccurred) {
+                      // If we make it this far then we've managed to change
+                      // their username without issues      
                       usernameChanged = true;
-                    });
+                    }
                   }
                 }
-                else {
-                  // Clear the screen of any past messages not related to 
-                  // the current vatestlidation
-                  setState(() {});
-                }
+                
+                previousUsername = usernameController.text;
+                setState(() {});
               }, 
               child: Text('Submit')
             ),
