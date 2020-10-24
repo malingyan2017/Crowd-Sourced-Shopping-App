@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Database/database.dart';
+import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Common/edit_location.dart';
 import 'package:flutter/src/material/colors.dart';
 import 'package:shopping_app/Views/Common/edit_username.dart';
@@ -24,8 +25,7 @@ class SideDrawer extends StatelessWidget {
         if (snapshot.hasError) {
           return Text("Something went wrong");
         }
-
-        if (snapshot.hasData) {
+        else if (snapshot.hasData) {
           Map<String, dynamic> data = snapshot.data.data();
           return Text(
             'Username: ${data['username']}\nRank: ${data['rank']}\nLocation: -tbd-\n',
@@ -45,7 +45,7 @@ class SideDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.height * .30,
+            height: Measure.screenHeightFraction(context, .3),
             child: DrawerHeader(
               margin: EdgeInsets.zero,
               padding: EdgeInsets.zero,
