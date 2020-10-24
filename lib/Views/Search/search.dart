@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Views/Search/dropDownButton.dart';
+import 'package:shopping_app/Database/database.dart';
+import 'package:provider/provider.dart';
+import 'package:shopping_app/Models/the_user.dart';
 
 //https://morioh.com/p/3522d01c11ef
 
@@ -14,6 +17,7 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<TheUser>(context);
     //items to show when there is no searchName found
     CollectionReference items = FirebaseFirestore.instance.collection('item');
 
@@ -50,6 +54,7 @@ class _SearchState extends State<Search> {
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot data = snapshot.data.docs[index];
+                          String docId = data.id;
                           return Card(
                               child: Row(
                             children: [
@@ -72,7 +77,14 @@ class _SearchState extends State<Search> {
                                   MyDropDownButton(),
                                   RaisedButton(
                                       child: Text('add to cart'),
-                                      onPressed: () {}),
+                                      onPressed: () async {
+                                        await DatabaseService(uid: user.uid)
+                                            .addToCart(
+                                          docId,
+                                          data['name'],
+                                          data['pictureUrl'],
+                                        );
+                                      }),
                                 ],
                               )
                             ],
