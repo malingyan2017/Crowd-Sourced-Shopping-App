@@ -73,6 +73,10 @@ class DatabaseService {
     return userCollection.doc(uid).snapshots();
   }
 
+  Future<DocumentSnapshot> getStoreSnapshot(String storeId) {
+    return storeCollection.doc(storeId).get();
+  }
+
   // Searches for items matching the keywords passed in.
   // Returns a Future list of QuerySnapshots.
   // The first item in the list represents all items that match by name.

@@ -9,8 +9,7 @@ class TheUser {
   String username;
   int rankPoints;
   String rankIconUrl;
-  int preferredLocation;
-  int preferredStoreId;
+  String preferredStoreId;
   ShoppingList shoppingList;
 
   TheUser(
@@ -18,7 +17,6 @@ class TheUser {
       this.username,
       this.rankPoints, 
       this.rankIconUrl, 
-      this.preferredLocation, 
       this.preferredStoreId,
       this.shoppingList
     }

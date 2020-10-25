@@ -10,6 +10,9 @@ class UpdateLocation extends StatelessWidget {
   static const String routeName = '/editLocation';
   static const String appBarTitle = 'Edit Location';
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final Store preferredStore;
+
+  UpdateLocation({Key key, this.preferredStore}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,10 @@ class UpdateLocation extends StatelessWidget {
           else if (snapshot.connectionState == ConnectionState.done) {
             List<Store> storeList = db.queryToStoreList(snapshot.data.docs);
 
-            return _StoreDropDown(storeList: storeList,);
+            return _StoreDropDown(
+              storeList: storeList,
+              preferredStore: preferredStore,
+            );
           }
           else {
             return CenteredLoadingCircle(
@@ -49,8 +55,9 @@ class UpdateLocation extends StatelessWidget {
 class _StoreDropDown extends StatefulWidget {
 
   final List<Store> storeList;
+  final Store preferredStore;
 
-  _StoreDropDown({Key key, this.storeList}) : super(key: key);
+  _StoreDropDown({Key key, this.storeList, this.preferredStore}) : super(key: key);
 
   @override
   _StoreDropDownState createState() => _StoreDropDownState();
@@ -66,11 +73,13 @@ class _StoreDropDownState extends State<_StoreDropDown> {
   @override
   void initState() {
     uniqueGeneralAddresses = uniqueCityStateZip();
-    String startingGeneralAddress = uniqueGeneralAddresses[0];
+    String startingGeneralAddress = 
+      widget.preferredStore?.cityStateZip ?? uniqueGeneralAddresses[0];
     generalAddressValue = startingGeneralAddress;
 
     matchingStores = allMatchingStores(generalAddressValue);
-    storeAddressValue = matchingStores[0].nameWithStreetAddress;
+    storeAddressValue = 
+      widget.preferredStore?.nameWithStreetAddress ?? matchingStores[0].nameWithStreetAddress;
 
     // TODO: implement initState
     super.initState();
@@ -166,6 +175,19 @@ class _StoreDropDownState extends State<_StoreDropDown> {
 
     matches.sort((a, b) => a.nameWithStreetAddress.compareTo(b.nameWithStreetAddress));
     return matches;
+  }
+
+  Store getMatchingStore(String nameWithStreetAddress, String cityStateZip) {
+
+    Store match = widget.storeList.firstWhere(
+      (Store store) {
+
+        return store.nameWithStreetAddress == nameWithStreetAddress 
+          && store.cityStateZip == cityStateZip;
+      }
+    );
+
+    return match;
   }
 
 }

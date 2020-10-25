@@ -25,6 +25,16 @@ class Store {
     }
   );
 
+  Store.storeFromMap(Map<String, dynamic> data) {
+
+    id = data['id'];
+    name = data['name'];
+    streetAddress = data['streetAddress'];
+    city = data['city'];
+    state = data['state'];
+    zipCode = data['zipCode'];
+  }
+
   String get fullAddress {
 
     return '''$name

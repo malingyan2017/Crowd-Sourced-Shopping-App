@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Database/database.dart';
+import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Common/edit_location.dart';
 import 'package:flutter/src/material/colors.dart';
@@ -17,6 +18,52 @@ class SideDrawer extends StatelessWidget {
     
     //CollectionReference myUser = FirebaseFirestore.instance.collection('users');
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
+    Store preferredStore;
+
+    final TextStyle userInfoStyle = TextStyle(
+      color: Colors.black87,
+      fontSize: 16.0,
+      height: 1.5,
+    );
+
+    Text userInfoText(String text) {
+
+      return Text(
+        text, 
+        style: userInfoStyle,
+      );
+    }
+
+    Widget displayStoreInfo(Map<String, dynamic> data) {
+
+      return FutureBuilder<DocumentSnapshot>(
+        future: db.getStoreSnapshot(data['preferredLocation']),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+
+          String message;
+          
+          if (snapshot.hasError) {
+            message = "Something went wrong";
+          }
+          else if (snapshot.connectionState == ConnectionState.done) {
+            Map<String, dynamic> mapOfStore = snapshot.data.data();
+
+            if (mapOfStore == null) {
+              message = 'No store selected';
+            }
+            else {
+              preferredStore = Store.storeFromMap(mapOfStore);
+              message = preferredStore.fullAddress;
+            }
+          }
+          else {
+            message = 'LOADING';
+          }
+
+          return userInfoText('Store: $message');
+        },
+      );
+    }
 
     Widget userStream = StreamBuilder(
       stream: db.getUserStream(),
@@ -26,13 +73,12 @@ class SideDrawer extends StatelessWidget {
         }
         else if (snapshot.hasData) {
           Map<String, dynamic> data = snapshot.data.data();
-          return Text(
-            'Username: ${data['username']}\nRank: ${data['rank']}\nLocation: -tbd-\n',
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 16.0,
-              height: 1.5,
-            ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              userInfoText('Username: ${data['username']}\nRank: ${data['rank']}'),
+              displayStoreInfo(data)
+            ],
           );
         }
         return Text("loading");
@@ -85,7 +131,9 @@ class SideDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => UpdateLocation()),
+                MaterialPageRoute(
+                  builder: (context) => UpdateLocation(preferredStore: preferredStore,)
+                ),
               );
             },
           ),
