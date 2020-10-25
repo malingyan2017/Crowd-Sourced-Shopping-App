@@ -37,9 +37,7 @@ class Store {
 
   String get fullAddress {
 
-    return '''$name
-              $streetAddress
-              $city, $state $zipCode''';
+    return '$name\n$streetAddress\n$city, $state $zipCode';
   }
 
   String get cityStateZip {

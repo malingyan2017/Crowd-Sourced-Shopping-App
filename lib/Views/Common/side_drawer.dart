@@ -73,11 +73,30 @@ class SideDrawer extends StatelessWidget {
         }
         else if (snapshot.hasData) {
           Map<String, dynamic> data = snapshot.data.data();
+
+          // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              userInfoText('Username: ${data['username']}\nRank: ${data['rank']}'),
-              displayStoreInfo(data)
+              Flexible(
+                child: Container(
+                  child: Icon(
+                    Icons.account_circle,
+                    color: Colors.black,
+                    size: 50,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Container(child: userInfoText('Username: ${data['username']}'))
+              ),
+              Flexible(
+                child: Container(child: userInfoText('Rank: ${data['rank']}'))
+              ),
+              Flexible(
+                flex: 2,
+                child: Container(child: displayStoreInfo(data))
+              )
             ],
           );
         }
@@ -90,32 +109,12 @@ class SideDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           Container(
-            height: Measure.screenHeightFraction(context, .3),
+            height: _userPaneSize(context),
             child: DrawerHeader(
-              margin: EdgeInsets.zero,
-              padding: EdgeInsets.zero,
               decoration: BoxDecoration(
                 color: Colors.blue[200],
               ),
-              child: Stack(
-                children: <Widget>[
-                  Positioned(
-                    left: 15,
-                    top: 15,
-                    child: Icon(
-                      Icons.account_circle,
-                      color: Colors.black,
-                      size: 50,
-                    ),
-                  ),
-                  Positioned(
-                    top: 75.0,
-                    left: 16.0,
-                    bottom: 10.0,
-                    child: userStream,
-                  ),
-                ],
-              ),
+              child: userStream,
             )
           ),
           ListTile(
@@ -171,4 +170,14 @@ class SideDrawer extends StatelessWidget {
       ),
     );
   }
+}
+
+// https://stackoverflow.com/questions/51284589/flutter-how-to-know-the-device-is-deviceorientation-is-up-or-down
+double _userPaneSize(BuildContext context) {
+
+  Orientation orientation = MediaQuery.of(context).orientation;
+
+  return orientation == Orientation.portrait
+  ? Measure.screenHeightFraction(context, .4)
+  : Measure.screenHeightFraction(context, .6);
 }

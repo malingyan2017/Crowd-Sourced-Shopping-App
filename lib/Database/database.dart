@@ -59,6 +59,10 @@ class DatabaseService {
     userCollection.doc(uid).update({'username': username});
   }
 
+  Future<void> updateUserPreferredLocation(String newStoreId) async {
+    userCollection.doc(uid).update({'preferredLocation': newStoreId});
+  }
+
   String pointsToRank(int points) {
     List<String> rankings = [];
 
@@ -226,28 +230,13 @@ class DatabaseService {
   }
 
   // Converts a list of maps into a list of store objects.  
-  List<Store> convertToStoreList(List<Map<String, dynamic>> storeList) {
-
-    return storeList.map((store) {
-      return Store(
-        id: store['id'],
-        name: store['name'],
-        streetAddress: store['streetAddress'],
-        city: store['city'],
-        state: store['state'],
-        zipCode: store['zipCode']
-      );
-    }).toList();
-  }
-
-  // Converts a list of maps into a list of store objects.  
   List<Store> queryToStoreList(List<QueryDocumentSnapshot> storeList) {
 
     return storeList.map((QueryDocumentSnapshot snapshot) {
       Map<String, dynamic> store = snapshot.data();
 
       return Store(
-        id: store['id'],
+        id: snapshot.id,
         name: store['name'],
         streetAddress: store['streetAddress'],
         city: store['city'],

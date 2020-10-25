@@ -65,10 +65,19 @@ class _StoreDropDown extends StatefulWidget {
 
 class _StoreDropDownState extends State<_StoreDropDown> {
 
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   String generalAddressValue;
   String storeAddressValue;
   List<String> uniqueGeneralAddresses;
   List<Store> matchingStores;
+  String submitMessage;
+
+  bool locationSaved = false;
+  bool errorOccurred = false;
+
+  static String saveSuccessMessage = 'Your location has been saved.';
+  static String errorMessage = 'There was an error saving your location.';
 
   @override
   void initState() {
@@ -88,10 +97,13 @@ class _StoreDropDownState extends State<_StoreDropDown> {
   @override
   Widget build(BuildContext context) {
 
+    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
+    double itemHeight = 0.13;
+
     List<Widget> columnChildren = [
       Text('Location'),
       DropdownButton(
-        itemHeight: Measure.screenHeightFraction(context, .1),
+        itemHeight: Measure.screenHeightFraction(context, itemHeight),
         isExpanded: true,
         underline: Container(
           height: 2,
@@ -111,20 +123,22 @@ class _StoreDropDownState extends State<_StoreDropDown> {
           generalAddressValue = newValue;
           matchingStores = allMatchingStores(generalAddressValue);
           storeAddressValue = matchingStores[0].nameWithStreetAddress;
+          locationSaved = false;
+          errorOccurred = false;
           setState(() {});
         }
       ),
       Padding(padding: EdgeInsets.all(10)),
       Text('Find Store'),
       DropdownButton(
-        itemHeight: Measure.screenHeightFraction(context, .1),
+        itemHeight: Measure.screenHeightFraction(context, itemHeight),
         isExpanded: true,
         underline: Container(
           height: 2,
           color: Colors.blueGrey,
         ),
         value: storeAddressValue,
-        items:  matchingStores
+        items: matchingStores
           .map<DropdownMenuItem<String>>((Store store) {
             String nameWithStreetAddress = store.nameWithStreetAddress;
 
@@ -135,10 +149,49 @@ class _StoreDropDownState extends State<_StoreDropDown> {
           }
         ).toList(),
         onChanged: (String newValue) {
-          storeAddressValue = newValue;
+          setState(() {
+            locationSaved = false;
+            errorOccurred = false;
+            storeAddressValue = newValue;
+          });
         },
+      ),
+      Padding(padding: EdgeInsets.all(10)),
+      ElevatedButton(
+        onPressed: () async {
+          locationSaved = false;
+          errorOccurred = false;
+
+          Store newStore = getMatchingStore(storeAddressValue, generalAddressValue);
+
+          if (newStore == null) {
+            errorOccurred = true;
+          }
+          else {
+            await db.updateUserPreferredLocation(newStore.id)
+            .catchError((error) => errorOccurred = true);
+
+            if (!errorOccurred) {
+              locationSaved = true;
+            }
+          }
+
+          setState(() {});
+        }, 
+        child: Text('Save')
       )
     ];
+
+    if (locationSaved || errorOccurred) {
+
+      Text message;
+
+      locationSaved 
+      ? message = Text(saveSuccessMessage, style: TextStyle(color: Colors.green))
+      : message = Text(errorMessage, style: TextStyle(color: Colors.red));
+
+      columnChildren.add(message);
+    }
 
     return Padding(
       padding: const EdgeInsets.all(15.0),
@@ -184,7 +237,8 @@ class _StoreDropDownState extends State<_StoreDropDown> {
 
         return store.nameWithStreetAddress == nameWithStreetAddress 
           && store.cityStateZip == cityStateZip;
-      }
+      },
+      orElse: () => null
     );
 
     return match;
