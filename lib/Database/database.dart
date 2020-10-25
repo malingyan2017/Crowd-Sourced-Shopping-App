@@ -26,13 +26,19 @@ class DatabaseService {
       FirebaseFirestore.instance.collection(DatabaseConstants.items);
 
   //add to cart function
-  Future addToCart(String itemId, String name, String image) async {
+  Future addToCart(
+      String itemId, String name, String image, int quantity) async {
     return await FirebaseFirestore.instance
-        .collection('item')
+        .collection('users')
         .doc(uid)
         .collection('shoppingList')
         .doc()
-        .set({'name': name, 'image': image, 'itemId': itemId});
+        .set({
+      'name': name,
+      'image': image,
+      'itemId': itemId,
+      'quantity': quantity
+    });
   }
 
   //create if not there or update the user data in data base
@@ -45,18 +51,14 @@ class DatabaseService {
   }
 
   Future<bool> usernameExists(String username) async {
-
-    QuerySnapshot querySnapshot =  
-      await userCollection.where('username', isEqualTo: username).get();
+    QuerySnapshot querySnapshot =
+        await userCollection.where('username', isEqualTo: username).get();
 
     return querySnapshot.size >= 1;
   }
 
   Future<void> updateUsername(String username) async {
-
-    userCollection.doc(uid).update({
-      'username': username
-    });
+    userCollection.doc(uid).update({'username': username});
   }
 
   String pointsToRank(int points) {

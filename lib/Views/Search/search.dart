@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_app/Views/Search/dropDownButton.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Models/the_user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopping_app/Views/Search/dropDownButton.dart';
 
 //https://morioh.com/p/3522d01c11ef
 
@@ -14,6 +15,7 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   String searchName;
+  //FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +76,11 @@ class _SearchState extends State<Search> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('name: ${data['name']}'),
-                                  MyDropDownButton(),
+                                  MyDropDownButton(
+                                    data: data,
+                                    docId: docId,
+                                  ),
+                                  /*
                                   RaisedButton(
                                       child: Text('add to cart'),
                                       onPressed: () async {
@@ -84,7 +90,7 @@ class _SearchState extends State<Search> {
                                           data['name'],
                                           data['pictureUrl'],
                                         );
-                                      }),
+                                      }),*/
                                 ],
                               )
                             ],
