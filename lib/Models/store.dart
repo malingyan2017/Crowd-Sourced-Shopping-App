@@ -8,7 +8,7 @@ class Store {
   String streetAddress;
   String city;
   String state;
-  int zipCode;
+  String zipCode;
   List<StoreItem> items = [];
   List<Review> reviews = [];
 
@@ -24,5 +24,22 @@ class Store {
       this.reviews
     }
   );
+
+  String get fullAddress {
+
+    return '''$name
+              $streetAddress
+              $city, $state $zipCode''';
+  }
+
+  String get cityStateZip {
+
+    return '$city, $state $zipCode';
+  }
+
+  String get nameWithStreetAddress {
+
+    return '$name\n$streetAddress';
+  }
 
 }

@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UpdateUser extends StatelessWidget {
   static const String routeName = '/updateUser';
   static const String appBarTitle = 'Edit Username';
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {

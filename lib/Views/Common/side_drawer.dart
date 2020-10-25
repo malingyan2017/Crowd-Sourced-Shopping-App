@@ -4,7 +4,6 @@ import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Common/edit_location.dart';
 import 'package:flutter/src/material/colors.dart';
 import 'package:shopping_app/Views/Common/edit_username.dart';
-import 'package:flutter/material.dart';
 import 'package:shopping_app/Database/auth_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

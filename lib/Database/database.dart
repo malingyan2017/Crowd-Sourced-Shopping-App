@@ -1,13 +1,11 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shopping_app/Constants/database_constants.dart';
-import 'package:shopping_app/Models/item.dart';
+
 import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
-import 'package:shopping_app/Models/the_user.dart';
+
 
 class DatabaseService {
   final String uid;
@@ -168,12 +166,20 @@ class DatabaseService {
   // Add review for a given store.
   // Throws an exception if the add fails.
   Future<void> addStoreReview(String storeId, Review review) async {
-    storeCollection.doc(storeId).collection('reviews').add({
-      'userId': uid,
-      'rating': review.rating,
-      'dateWritten': review.dateCreated,
-      'body': review.body
-    });
+
+    storeCollection
+    .doc(storeId)
+    .collection('reviews')
+    .add(
+      {
+        'userId': uid,
+        'rating': review.rating,
+        'dateWritten': review.dateCreated,
+        'body': review.body
+      }
+    );
+
+    // TO DO: Provide points to the user for providing a rating.
   }
 
   // Returns the most recent reviews written throughout the database
@@ -196,7 +202,7 @@ class DatabaseService {
         .snapshots();
   }
 
-  // Resturns the user's shopping list as a stream.
+  // Returns the user's shopping list as a stream.
   Stream<QuerySnapshot> getShoppingList() {
     return userCollection
         .doc(uid)
@@ -204,5 +210,46 @@ class DatabaseService {
         .snapshots();
   }
 
-  Future<void> removeShoppingListItem() {}
+  Future<void> removeShoppingListItem() {
+
+    
+  }
+
+  // Get all stores as a query snapshot.
+  Future<QuerySnapshot> getStoreListQuery() {
+
+    return storeCollection.get();
+  }
+
+  // Converts a list of maps into a list of store objects.  
+  List<Store> convertToStoreList(List<Map<String, dynamic>> storeList) {
+
+    return storeList.map((store) {
+      return Store(
+        id: store['id'],
+        name: store['name'],
+        streetAddress: store['streetAddress'],
+        city: store['city'],
+        state: store['state'],
+        zipCode: store['zipCode']
+      );
+    }).toList();
+  }
+
+  // Converts a list of maps into a list of store objects.  
+  List<Store> queryToStoreList(List<QueryDocumentSnapshot> storeList) {
+
+    return storeList.map((QueryDocumentSnapshot snapshot) {
+      Map<String, dynamic> store = snapshot.data();
+
+      return Store(
+        id: store['id'],
+        name: store['name'],
+        streetAddress: store['streetAddress'],
+        city: store['city'],
+        state: store['state'],
+        zipCode: store['zipCode']
+      );
+    }).toList();
+  }
 }
