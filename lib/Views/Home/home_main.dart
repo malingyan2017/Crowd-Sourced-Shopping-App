@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Views/Common/app_bar.dart';
+import 'package:shopping_app/Views/Home/livefeed_price_updates.dart';
 import 'package:shopping_app/Views/Home/livefeed_reviews.dart';
-
-import 'livefeed_price_updates.dart';
 
 // Source: https://stackoverflow.com/questions/50609252/flutter-tabbar-without-appbar
 
 class Home extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
