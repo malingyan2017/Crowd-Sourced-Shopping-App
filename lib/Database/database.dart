@@ -6,7 +6,6 @@ import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
 
-
 class DatabaseService {
   final String uid;
 
@@ -37,6 +36,15 @@ class DatabaseService {
       'itemId': itemId,
       'quantity': quantity
     });
+  }
+
+  Future<DocumentSnapshot> gotStoreInfo(String storeId) async {
+    var result = await FirebaseFirestore.instance
+        .collection('stores')
+        .doc(storeId)
+        .get();
+
+    return result;
   }
 
   //create if not there or update the user data in data base
@@ -174,18 +182,12 @@ class DatabaseService {
   // Add review for a given store.
   // Throws an exception if the add fails.
   Future<void> addStoreReview(String storeId, Review review) async {
-
-    storeCollection
-    .doc(storeId)
-    .collection('reviews')
-    .add(
-      {
-        'userId': uid,
-        'rating': review.rating,
-        'dateWritten': review.dateCreated,
-        'body': review.body
-      }
-    );
+    storeCollection.doc(storeId).collection('reviews').add({
+      'userId': uid,
+      'rating': review.rating,
+      'dateWritten': review.dateCreated,
+      'body': review.body
+    });
 
     // TO DO: Provide points to the user for providing a rating.
   }
@@ -218,31 +220,25 @@ class DatabaseService {
         .snapshots();
   }
 
-  Future<void> removeShoppingListItem() {
-
-    
-  }
+  Future<void> removeShoppingListItem() {}
 
   // Get all stores as a query snapshot.
   Future<QuerySnapshot> getStoreListQuery() {
-
     return storeCollection.get();
   }
 
-  // Converts a list of maps into a list of store objects.  
+  // Converts a list of maps into a list of store objects.
   List<Store> queryToStoreList(List<QueryDocumentSnapshot> storeList) {
-
     return storeList.map((QueryDocumentSnapshot snapshot) {
       Map<String, dynamic> store = snapshot.data();
 
       return Store(
-        id: snapshot.id,
-        name: store['name'],
-        streetAddress: store['streetAddress'],
-        city: store['city'],
-        state: store['state'],
-        zipCode: store['zipCode']
-      );
+          id: snapshot.id,
+          name: store['name'],
+          streetAddress: store['streetAddress'],
+          city: store['city'],
+          state: store['state'],
+          zipCode: store['zipCode']);
     }).toList();
   }
 }
