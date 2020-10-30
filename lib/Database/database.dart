@@ -247,7 +247,7 @@ class DatabaseService {
     }).toList();
   }
 
- /*  // Creates a set of store items inside of every store.
+  /*// Creates a set of store items inside of every store.
   void initializeAllStoreItems() async {
 
     DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
@@ -288,9 +288,7 @@ class DatabaseService {
           'pictureUrl': item.pictureUrl,
           'price': 10.99,
           'onSale': false,
-          'updatedBy': userSnapshot.data()['username'],
-          'userRank': userSnapshot.data()['rank'],
-          'dataUpdated': DateTime.now()
+          'dateUpdated': DateTime.now()
         });
       });
     });
