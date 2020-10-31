@@ -1,4 +1,5 @@
 import 'package:shopping_app/Models/shopping_list.dart';
+import 'package:shopping_app/Models/store.dart';
 
 class TheUser {
 
@@ -9,7 +10,7 @@ class TheUser {
   String username;
   int rankPoints;
   String rankIconUrl;
-  String preferredStoreId;
+  Store preferredStore;
   ShoppingList shoppingList;
 
   TheUser(
@@ -17,7 +18,7 @@ class TheUser {
       this.username,
       this.rankPoints, 
       this.rankIconUrl, 
-      this.preferredStoreId,
+      this.preferredStore,
       this.shoppingList
     }
   );

@@ -168,7 +168,7 @@ class _StoreDropDownState extends State<_StoreDropDown> {
             errorOccurred = true;
           }
           else {
-            await db.updateUserPreferredLocation(newStore.id)
+            await db.updateUserPreferredLocation(newStore)
             .catchError((error) => errorOccurred = true);
 
             if (!errorOccurred) {

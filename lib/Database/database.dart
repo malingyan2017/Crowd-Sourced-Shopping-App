@@ -67,8 +67,16 @@ class DatabaseService {
     userCollection.doc(uid).update({'username': username});
   }
 
-  Future<void> updateUserPreferredLocation(String newStoreId) async {
-    userCollection.doc(uid).update({'preferredLocation': newStoreId});
+  Future<void> updateUserPreferredLocation(Store newStore) async {
+    userCollection.doc(uid).update({
+      'preferredLocation.id': newStore.id,
+      'preferredLocation.name': newStore.name,
+      'preferredLocation.streetAddress': newStore.streetAddress,
+      'preferredLocation.city': newStore.city,
+      'preferredLocation.state': newStore.state,
+      'preferredLocation.zipCode': newStore.zipCode
+      }
+    );
   }
 
   String pointsToRank(int points) {
@@ -257,4 +265,53 @@ class DatabaseService {
           zipCode: store['zipCode']);
     }).toList();
   }
+
+  /*// Creates a set of store items inside of every store.
+  void initializeAllStoreItems() async {
+
+    DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
+    QuerySnapshot itemSnapshot = await itemCollection.get();
+
+    List<StoreItem> items = itemSnapshot.docs.map((QueryDocumentSnapshot snapshot) {
+      Map<String, dynamic> item = snapshot.data();
+
+      return StoreItem(
+        itemId: snapshot.id,
+        barcode: item['barcode'],
+        name: item['name'],
+        pictureUrl: item['pictureUrl'],
+      );
+    }).toList();
+
+    QuerySnapshot storeSnapshot = await storeCollection.get();
+
+    List<String> storeIds = [];
+
+    storeSnapshot.docs.toList().forEach((QueryDocumentSnapshot snapshot) { 
+
+      storeIds.add(snapshot.id);
+    });
+
+    // Copy every item into every store's storeItem subcollection
+    items.forEach((StoreItem item) { 
+      storeIds.forEach((String storeId) { 
+
+        storeCollection
+        .doc(storeId)
+        .collection(DatabaseConstants.storeItems)
+        .add({
+          'userId': uid,
+          'itemId': item.itemId,
+          'barcode': item.barcode,
+          'name': item.name,
+          'pictureUrl': item.pictureUrl,
+          'price': 10.99,
+          'onSale': false,
+          'dateUpdated': DateTime.now()
+        });
+      });
+    });
+  }*/
 }
+
+

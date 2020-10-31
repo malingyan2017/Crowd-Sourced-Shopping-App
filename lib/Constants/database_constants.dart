@@ -3,7 +3,7 @@ class DatabaseConstants {
 
   static const String users = 'users';
   static const String stores = 'stores';
-  static const String items = 'items';
+  static const String items = 'item';
   static const String storeItems = 'storeItems';
   static const String reviews = 'reviews';
   static const String shoppingList = 'shoppingList';
