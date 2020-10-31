@@ -46,6 +46,7 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
                 widget.data['name'],
                 widget.data['pictureUrl'],
                 quantity,
+                widget.data['barcode'],
               );
             }),
       ],

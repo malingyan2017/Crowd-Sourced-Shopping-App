@@ -23,8 +23,8 @@ class DatabaseService {
       FirebaseFirestore.instance.collection(DatabaseConstants.items);
 
   //add to cart function
-  Future addToCart(
-      String itemId, String name, String image, int quantity) async {
+  Future addToCart(String itemId, String name, String image, int quantity,
+      String barcode) async {
     return await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -34,7 +34,8 @@ class DatabaseService {
       'name': name,
       'image': image,
       'itemId': itemId,
-      'quantity': quantity
+      'quantity': quantity,
+      'barcode': barcode,
     });
   }
 
@@ -75,8 +76,7 @@ class DatabaseService {
       'preferredLocation.city': newStore.city,
       'preferredLocation.state': newStore.state,
       'preferredLocation.zipCode': newStore.zipCode
-      }
-    );
+    });
   }
 
   String pointsToRank(int points) {
@@ -313,5 +313,3 @@ class DatabaseService {
     });
   }*/
 }
-
-
