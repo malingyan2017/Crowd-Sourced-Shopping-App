@@ -6,6 +6,7 @@ import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
 //source: https://pub.dev/packages/flutter_barcode_scanner/example
@@ -59,7 +60,9 @@ class _BarcodeScanState extends State<BarcodeScan> {
           context: context,
           builder: (context) {
             return Container(
-              child: Text('you are here'),
+              child: TagsForm(
+                barcode: scanResult,
+              ),
             );
           });
     }
