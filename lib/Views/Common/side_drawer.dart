@@ -3,10 +3,8 @@ import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Common/edit_location.dart';
-import 'package:flutter/src/material/colors.dart';
 import 'package:shopping_app/Views/Common/edit_username.dart';
 import 'package:shopping_app/Database/auth_state.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SideDrawer extends StatelessWidget {
@@ -34,37 +32,6 @@ class SideDrawer extends StatelessWidget {
       );
     }
 
-    Widget displayStoreInfo(Map<String, dynamic> data) {
-
-      return FutureBuilder<DocumentSnapshot>(
-        future: db.getStoreSnapshot(data['preferredLocation']),
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-
-          String message;
-          
-          if (snapshot.hasError) {
-            message = "Something went wrong";
-          }
-          else if (snapshot.connectionState == ConnectionState.done) {
-            Map<String, dynamic> mapOfStore = snapshot.data.data();
-
-            if (mapOfStore == null) {
-              message = 'No store selected';
-            }
-            else {
-              preferredStore = Store.storeFromMap(mapOfStore);
-              message = preferredStore.fullAddress;
-            }
-          }
-          else {
-            message = 'LOADING';
-          }
-
-          return userInfoText('Store: $message');
-        },
-      );
-    }
-
     Widget userStream = StreamBuilder(
       stream: db.getUserStream(),
       builder: (context, snapshot) {
@@ -73,6 +40,7 @@ class SideDrawer extends StatelessWidget {
         }
         else if (snapshot.hasData) {
           Map<String, dynamic> data = snapshot.data.data();
+          Store preferredStore = Store.storeFromMap(data['preferredLocation']);
 
           // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
           return Column(
@@ -95,7 +63,7 @@ class SideDrawer extends StatelessWidget {
               ),
               Flexible(
                 flex: 2,
-                child: Container(child: displayStoreInfo(data))
+                child: Container(child: userInfoText('Store: ${preferredStore.fullAddress}'))
               )
             ],
           );

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shopping_app/Constants/database_constants.dart';
-import 'package:shopping_app/Models/item.dart';
 
 import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/store.dart';
@@ -60,8 +59,16 @@ class DatabaseService {
     userCollection.doc(uid).update({'username': username});
   }
 
-  Future<void> updateUserPreferredLocation(String newStoreId) async {
-    userCollection.doc(uid).update({'preferredLocation': newStoreId});
+  Future<void> updateUserPreferredLocation(Store newStore) async {
+    userCollection.doc(uid).update({
+      'preferredLocation.id': newStore.id,
+      'preferredLocation.name': newStore.name,
+      'preferredLocation.streetAddress': newStore.streetAddress,
+      'preferredLocation.city': newStore.city,
+      'preferredLocation.state': newStore.state,
+      'preferredLocation.zipCode': newStore.zipCode
+      }
+    );
   }
 
   String pointsToRank(int points) {
