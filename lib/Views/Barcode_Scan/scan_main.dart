@@ -76,9 +76,9 @@ class _BarcodeScanState extends State<BarcodeScan> {
               stream: DatabaseService(uid: user.uid).getUserStream(),
               builder: (context, snapshot) {
                 var data = snapshot.data;
-                String storeId = data['preferredLocation']['id'];
-                String storeName = data['preferrdLocation']['name'];
-                String storeZipcode = data['preferredLocation']['zipCode'];
+                String storeId = data['preferredLocation.id'];
+                String storeName = data['preferredLocation.name'];
+                String storeZipcode = data['preferredLocation.zipCode'];
 
                 if (snapshot.hasError) {
                   return Text('Something went wrong');
