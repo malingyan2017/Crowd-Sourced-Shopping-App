@@ -13,7 +13,8 @@ class SideDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
+
+    const String noPreferredStore = 'A store has not been selected.';
     //CollectionReference myUser = FirebaseFirestore.instance.collection('users');
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
     Store preferredStore;
@@ -40,8 +41,12 @@ class SideDrawer extends StatelessWidget {
         }
         else if (snapshot.hasData) {
           Map<String, dynamic> data = snapshot.data.data();
-          Store preferredStore = Store.storeFromMap(data['preferredLocation']);
+          Store preferredStore;
 
+          if (data['preferredLocation'] != null) {
+            preferredStore = Store.storeFromMap(data['preferredLocation']);
+          }
+          
           // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +68,11 @@ class SideDrawer extends StatelessWidget {
               ),
               Flexible(
                 flex: 2,
-                child: Container(child: userInfoText('Store: ${preferredStore.fullAddress}'))
+                child: Container(
+                  child: preferredStore == null 
+                  ? userInfoText('Store: $noPreferredStore')
+                  : userInfoText('Store: ${preferredStore.fullAddress}')
+                )
               )
             ],
           );
