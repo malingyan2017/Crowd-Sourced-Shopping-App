@@ -85,6 +85,22 @@ class DatabaseService {
     return userCollection.doc(uid).snapshots();
   }
 
+  Stream<DocumentSnapshot> getStoreStream(String storeId) {
+    return storeCollection.doc(storeId).snapshots();
+  }
+
+  Stream<QuerySnapshot> getItemStream(String barcode) {
+    return itemCollection.where('barcode', isEqualTo: barcode).snapshots();
+  }
+
+  Stream<QuerySnapshot> getStoreItemStream(String storeId, String barcode) {
+    return storeCollection
+        .doc(storeId)
+        .collection('storeItems')
+        .where('barcode', isEqualTo: barcode)
+        .snapshots();
+  }
+
   Future<DocumentSnapshot> getStoreSnapshot(String storeId) {
     return storeCollection.doc(storeId).get();
   }

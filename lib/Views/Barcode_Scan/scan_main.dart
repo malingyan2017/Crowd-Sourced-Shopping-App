@@ -6,8 +6,10 @@ import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
 //source: https://pub.dev/packages/flutter_barcode_scanner/example
+//https://www.youtube.com/watch?v=4QpzUDc-c7A&list=PL4cUxeGkcC9j--TKIdkb3ISfRbJeJYQwC&index=21&ab_channel=TheNetNinja
 
 class BarcodeScan extends StatefulWidget {
   @override
@@ -15,41 +17,8 @@ class BarcodeScan extends StatefulWidget {
 }
 
 class _BarcodeScanState extends State<BarcodeScan> {
-  String scanResult = 'unknown barcode';
+  String scanResult = '';
 
-  String myStoreId = '';
-
-  String mystore = '';
-
-  // get myStoreId function
-  void myStoreIdInfo() {
-    var user = FirebaseAuth.instance.currentUser.uid;
-    var userquery = FirebaseFirestore.instance.collection('users').doc(user);
-    userquery.get().then((value) {
-      if (value.data().length > 0) {
-        print(myStoreId);
-        setState(() {
-          myStoreId = value.data()['preferredLocation'];
-        });
-      } else {
-        print('id doesn not exist');
-      }
-    });
-  }
-
-  /*
-  void myStore() {
-    var user = FirebaseAuth.instance.currentUser.uid;
-    var userquery =
-        FirebaseFirestore.instance.collection('stores').doc(myStoreId);
-
-    userquery.get().then((value) {
-      setState(() {
-        mystore = value.data()['name'];
-      });
-    });
-  }
-*/
   // scan barcode function.
   Future<void> scanBarcode() async {
     String barcodeScanRes;
@@ -75,20 +44,25 @@ class _BarcodeScanState extends State<BarcodeScan> {
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
 
-    myStoreIdInfo();
-    print(myStoreId);
-    DocumentReference stores =
-        FirebaseFirestore.instance.collection('stores').doc(myStoreId);
-
-    if (myStoreId == null) {
-      return Text(
-          'please go to the update user file side drawer and choose one');
+    void _showUpdateForm() {
+      showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Container(
+              child: UpdateForm(),
+            );
+          });
     }
 
-    //myStore();
-    //var myStore = DatabaseService(uid: user.uid).getStoreSnapshot(myStoreId);
-    //print(myStore);
-    //print(myStore.get(name));
+    void _showTagsForm() {
+      showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Container(
+              child: Text('you are here'),
+            );
+          });
+    }
 
     return Column(
       children: [
@@ -97,61 +71,107 @@ class _BarcodeScanState extends State<BarcodeScan> {
           child: Text("Start barcode scan"),
         ),
         Text(scanResult),
-        StreamBuilder<Object>(
-            stream: stores.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Text('Something went wrong');
-              }
+        Flexible(
+          child: StreamBuilder<DocumentSnapshot>(
+              stream: DatabaseService(uid: user.uid).getUserStream(),
+              builder: (context, snapshot) {
+                var data = snapshot.data;
+                String storeId = data['preferredLocation']['id'];
+                String storeName = data['preferrdLocation']['name'];
+                String storeZipcode = data['preferredLocation']['zipCode'];
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Text("Loading");
-              }
-              return ListTile(
-                title: Text(snapshot.data),
-              );
-            }),
-        /*
-        FutureBuilder(
-            future: DatabaseService(uid: user.uid).getStoreSnapshot(myStoreId),
-            builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: 1,
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        title: Text(snapshot.data["name"]),
-                      );
-                    });
-              } else if (snapshot.connectionState == ConnectionState.none) {
-                return Text("No data");
-              } else {
-                return CircularProgressIndicator();
-              }
-            })
-            */
+                if (snapshot.hasError) {
+                  return Text('Something went wrong');
+                }
 
-        /*
-        StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('stores')
-                .doc(myStoreId)
-                .collection('storeItems')
-                .where('barCode', isEqualTo: scanResult)
-                .snapshots(),
-            builder: (context, snapshot) {
-              return (snapshot.connectionState == ConnectionState.waiting)
-                  ? Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        Text('${snapshot.data.docs[0]['name']}'),
-                        Text(scanResult),
-                        //Text(mystore['name']),
-                      ],
-                    );
-            }),
-            */
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text("Loading");
+                }
+                return scanResult == ''
+                    ? Text(
+                        'no item is scanned yet, you are at $storeName with zipcode $storeZipcode')
+                    : StreamBuilder<QuerySnapshot>(
+                        stream: DatabaseService()
+                            .getStoreItemStream(storeId, scanResult),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text('Something went wrong');
+                          }
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text("Loading");
+                          }
+                          return ListView.builder(
+                              itemCount: snapshot.data.docs.length,
+                              itemBuilder: (context, index) {
+                                DocumentSnapshot data =
+                                    snapshot.data.docs[index];
+                                var userUpdateId = data['userId'];
+
+                                return StreamBuilder<DocumentSnapshot>(
+                                    stream: DatabaseService(uid: userUpdateId)
+                                        .getUserStream(),
+                                    builder: (context, snapshot) {
+                                      var data1 = snapshot.data;
+                                      String userUpdateName = data1['username'];
+                                      return Card(
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 60,
+                                              height: 60,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      data['pictureUrl']),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('name: ${data['name']}'),
+                                                Text('price: ${data['price']}'),
+                                                Text(
+                                                    'update by: $userUpdateName'),
+                                                Text(
+                                                    'updated: ${data['dateUpdated'].toDate().toString()}'),
+                                                Text(
+                                                    'on sale: ${data['onSale']}')
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                RaisedButton(
+                                                  child: Text('update item'),
+                                                  onPressed: () =>
+                                                      _showUpdateForm(),
+                                                ),
+                                                RaisedButton(
+                                                  child: Text('add tags'),
+                                                  onPressed: () =>
+                                                      _showTagsForm(),
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    });
+                              });
+                        });
+              }),
+        ),
       ],
     );
   }
