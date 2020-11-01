@@ -239,12 +239,29 @@ class DatabaseService {
   // Returns the user's shopping list as a stream.
   Stream<QuerySnapshot> getShoppingList() {
     return userCollection
-        .doc(uid)
-        .collection(DatabaseConstants.shoppingList)
-        .snapshots();
+      .doc(uid)
+      .collection(DatabaseConstants.shoppingList)
+      .snapshots();
   }
 
-  Future<void> removeShoppingListItem() {}
+  Future<void> removeShoppingListItem(String listItemId) {
+
+    return userCollection
+      .doc(uid)
+      .collection(DatabaseConstants.shoppingList)
+      .doc(listItemId)
+      .delete();
+  }
+
+  Future<void> updateShoppingListItemQuantity({String listItemId, int quantity}) {
+
+    return FirebaseFirestore.instance
+      .collection(DatabaseConstants.users)
+      .doc(uid)
+      .collection(DatabaseConstants.shoppingList)
+      .doc(listItemId)
+      .update({'quantity': quantity});
+  }
 
   // Get all stores as a query snapshot.
   Future<QuerySnapshot> getStoreListQuery() {
@@ -257,12 +274,12 @@ class DatabaseService {
       Map<String, dynamic> store = snapshot.data();
 
       return Store(
-          id: snapshot.id,
-          name: store['name'],
-          streetAddress: store['streetAddress'],
-          city: store['city'],
-          state: store['state'],
-          zipCode: store['zipCode']);
+        id: snapshot.id,
+        name: store['name'],
+        streetAddress: store['streetAddress'],
+        city: store['city'],
+        state: store['state'],
+        zipCode: store['zipCode']);
     }).toList();
   }
 

@@ -7,6 +7,7 @@ import 'package:shopping_app/Views/Barcode_Scan/scan_main.dart';
 import 'package:shopping_app/Views/Search/search_main.dart';
 import 'package:shopping_app/Views/Common/side_drawer.dart';
 import 'package:shopping_app/Views/Common/app_bar.dart';
+import 'package:shopping_app/Views/Shopping_List/shopping_list.dart';
 
 // Sources: https://www.youtube.com/watch?v=WG4y47qGPX4&t=5s
 // https://api.flutter.dev/flutter/material/BottomNavigationBar-class.html
@@ -23,13 +24,15 @@ class _BaseAppState extends State<BaseApp> {
     SearchPage(),
     BarcodeScan(),
     Reviews(),
+    ShoppingList()
   ];
 
   List<String> _appBarTitles = <String>[
     'Live Feed',
     'Search',
     'Scan Item',
-    'Reviews'
+    'Reviews',
+    'Shopping List'
   ];
 
   void _onItemTap(int index) {
@@ -86,6 +89,14 @@ class _BaseAppState extends State<BaseApp> {
                 size: 32,
               ),
               label: 'Reviews',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.shopping_cart,
+                color: Colors.black,
+                size: 32,
+              ),
+              label: 'Shopping List',
             ),
           ],
           currentIndex: _selectedIndex,
