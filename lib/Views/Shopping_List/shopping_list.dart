@@ -32,7 +32,9 @@ class _ShoppingListState extends State<ShoppingList> {
         else if (snapshot.hasData) {
           //Map<String, dynamic> data = snapshot.data.data();
 
-          return ListView.builder(
+          return snapshot.data.docs.length == 0
+          ? _EmptyCart()
+          : ListView.builder(
             itemCount: snapshot.data.docs.length,
             itemBuilder: (BuildContext context, int index) {
               DocumentSnapshot document = snapshot.data.docs[index];
@@ -66,7 +68,7 @@ class _EmptyCart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        child: Text('Your cart is empty.  Add some more items to do a comparison.'),
+        child: Text('Your cart is empty.  Add some items to do a comparison.'),
       ),
     );
   }
