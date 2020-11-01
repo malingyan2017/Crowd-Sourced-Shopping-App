@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Components/centered_loading_circle.dart';
 import 'package:shopping_app/Database/database.dart';
-import 'package:shopping_app/Models/item.dart';
 import 'package:shopping_app/Models/list_item.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Util/measure.dart';
 
+// Most of the structure for the ui was adapted from Lingyan's work in 
+// the item search page.
 class ShoppingList extends StatefulWidget {
   @override
   _ShoppingListState createState() => _ShoppingListState();
@@ -83,6 +84,8 @@ class _ListItemCard extends StatefulWidget {
 
 class _ListItemCardState extends State<_ListItemCard> {
 
+  static const String itemRemovalErrorMessage = 'Error removing item from cart.';
+
   @override
   Widget build(BuildContext context) {
 
@@ -106,14 +109,27 @@ class _ListItemCardState extends State<_ListItemCard> {
           ),
         ),
         //Image.network(widget.item.pictureUrl),
-        title: Text('${widget.item.name}'),
+        title: Text(
+          '${widget.item.name}',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: _ListItemDropDownButton(
           item: widget.item,
-        ),
+        ),   
         trailing: RaisedButton(
           child: Text('Remove'),
           onPressed: () async {
-            await db.removeShoppingListItem(widget.item.itemId);
+            try {
+              await db.removeShoppingListItem(widget.item.listItemId);
+            }
+            catch (error){
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(itemRemovalErrorMessage)
+                )
+              );
+            }
           }
         )
       ),
@@ -181,7 +197,11 @@ class _ListItemDropDownButtonState extends State<_ListItemDropDownButton> {
                 quantity = newQuantity;
               }
               catch (error){
-                quantityError = true;
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(quantityErrorMessage)
+                  )
+                );
               }
               setState(() {});
             }  
