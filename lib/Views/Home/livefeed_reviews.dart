@@ -142,12 +142,16 @@ class LiveReviews extends StatelessWidget {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(left: 65.0, top: 25.0),
-                          child: FlutterRatingBarIndicator(
+                          padding: EdgeInsets.only(left: 65.0, top: 27.0),
+                          child: RatingBarIndicator(
+                            itemBuilder: (context, _) => Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
                             rating: rating.toDouble(),
                             itemCount: 5,
                             itemSize: 17.0,
-                            emptyColor: Colors.amber.withAlpha(90),
+                            // emptyColor: Colors.amber.withAlpha(90),
                           ),
                         ),
                         Padding(

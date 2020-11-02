@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 // https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
-// https://flutterawesome.com/a-simple-ratingbar-for-flutter-which-also-include-a-rating-bar-indicator/
 // https://github.com/flutter/flutter/issues/15928
 
 class LivePriceUpdates extends StatelessWidget {
