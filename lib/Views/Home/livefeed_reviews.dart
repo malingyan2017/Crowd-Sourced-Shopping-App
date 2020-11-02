@@ -24,9 +24,7 @@ class LiveReviews extends StatelessWidget {
     // Query for all reviews subcollections for the live feed
     var reviews = FirebaseFirestore.instance
         .collectionGroup('reviews')
-        //.where('date_created', isLessThanOrEqualTo: DateTime.now())
-        //.orderBy('date_created', descending: true)
-
+        .orderBy('date_created', descending: true)
         .limit(10);
 
     // Widget to retrieve location info such as store name, city and zip code

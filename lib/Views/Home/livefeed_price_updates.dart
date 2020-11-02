@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -6,8 +5,6 @@ import 'package:intl/intl.dart';
 // https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
 // https://flutterawesome.com/a-simple-ratingbar-for-flutter-which-also-include-a-rating-bar-indicator/
 // https://github.com/flutter/flutter/issues/15928
-
-enum UserDataTypes { rank, username }
 
 class LivePriceUpdates extends StatelessWidget {
   @override
@@ -37,8 +34,8 @@ class LivePriceUpdates extends StatelessWidget {
 
     var storeItems = FirebaseFirestore.instance
         .collectionGroup('storeItems')
-        //I'm not trying to .where('date_created', isLessThanOrEqualTo: DateTime.now())
-        //.orderBy('date_created')
+        //.where('dateUpdated', isLessThanOrEqualTo: DateTime.now())
+        .orderBy('dateUpdated', descending: true)
         .limit(10);
 
     // Widget to retrieve location info such as store name, city and zip code
@@ -118,7 +115,7 @@ class LivePriceUpdates extends StatelessWidget {
                 var storeId = data.reference.parent.parent.id;
 
                 // Get formatted time stamp of when price update was posted
-                Timestamp timestamp = data['dataUpdated'];
+                Timestamp timestamp = data['dateUpdated'];
                 DateTime myDateTime =
                     DateTime.parse(timestamp.toDate().toString());
                 String formattedDateTime =
@@ -167,7 +164,6 @@ class LivePriceUpdates extends StatelessWidget {
                           child: itemPriceText(itemPrice),
                         ),
                         Positioned(
-                          //padding: EdgeInsets.only(left: 150.0, top: 18.0),
                           left: 45,
                           top: 46,
                           child: Checkbox(
@@ -178,8 +174,6 @@ class LivePriceUpdates extends StatelessWidget {
                         Positioned(
                           left: 0.2,
                           bottom: 3,
-                          //padding: EdgeInsets.only(left: 193.0, top: 34.0),
-
                           child: Text('On Sale?'),
                         ),
                         Positioned(
