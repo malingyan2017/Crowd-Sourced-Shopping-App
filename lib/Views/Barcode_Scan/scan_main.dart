@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
-//source: https://pub.dev/packages/flutter_barcode_scanner/example
+//source:  https://pub.dev/packages/flutter_barcode_scanner/example
 //https://www.youtube.com/watch?v=4QpzUDc-c7A&list=PL4cUxeGkcC9j--TKIdkb3ISfRbJeJYQwC&index=21&ab_channel=TheNetNinja
 
 class BarcodeScan extends StatefulWidget {
@@ -45,12 +45,15 @@ class _BarcodeScanState extends State<BarcodeScan> {
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
 
-    void _showUpdateForm() {
+    void _showUpdateForm(String storeId, String itemId) {
       showModalBottomSheet(
           context: context,
           builder: (context) {
             return Container(
-              child: UpdateForm(),
+              child: UpdateForm(
+                storeId: storeId,
+                itemId: itemId,
+              ),
             );
           });
     }
@@ -78,11 +81,6 @@ class _BarcodeScanState extends State<BarcodeScan> {
           child: StreamBuilder<DocumentSnapshot>(
               stream: DatabaseService(uid: user.uid).getUserStream(),
               builder: (context, snapshot) {
-                var data = snapshot.data;
-                String storeId = data['preferredLocation.id'];
-                String storeName = data['preferredLocation.name'];
-                String storeZipcode = data['preferredLocation.zipCode'];
-
                 if (snapshot.hasError) {
                   return Text('Something went wrong');
                 }
@@ -90,6 +88,11 @@ class _BarcodeScanState extends State<BarcodeScan> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Text("Loading");
                 }
+                var data = snapshot.data;
+                String storeId = data['preferredLocation.id'];
+                String storeName = data['preferredLocation.name'];
+                String storeZipcode = data['preferredLocation.zipCode'];
+
                 return scanResult == ''
                     ? Text(
                         'no item is scanned yet, you are at $storeName with zipcode $storeZipcode')
@@ -111,11 +114,20 @@ class _BarcodeScanState extends State<BarcodeScan> {
                                 DocumentSnapshot data =
                                     snapshot.data.docs[index];
                                 var userUpdateId = data['userId'];
+                                var itemId = data.id;
 
                                 return StreamBuilder<DocumentSnapshot>(
                                     stream: DatabaseService(uid: userUpdateId)
                                         .getUserStream(),
                                     builder: (context, snapshot) {
+                                      if (snapshot.hasError) {
+                                        return Text('Something went wrong');
+                                      }
+
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Text("Loading");
+                                      }
                                       var data1 = snapshot.data;
                                       String userUpdateName = data1['username'];
                                       return Card(
@@ -158,7 +170,8 @@ class _BarcodeScanState extends State<BarcodeScan> {
                                                 RaisedButton(
                                                   child: Text('update item'),
                                                   onPressed: () =>
-                                                      _showUpdateForm(),
+                                                      _showUpdateForm(
+                                                          storeId, itemId),
                                                 ),
                                                 RaisedButton(
                                                   child: Text('add tags'),

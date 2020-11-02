@@ -22,6 +22,32 @@ class DatabaseService {
   final CollectionReference itemCollection =
       FirebaseFirestore.instance.collection(DatabaseConstants.items);
 
+  // update storeItem
+  Future<void> updateItem(String storeId, String itemId, double price,
+      bool sale, String uid) async {
+    return await FirebaseFirestore.instance
+        .collection('stores')
+        .doc(storeId)
+        .collection('storeItems')
+        .doc(itemId)
+        .update({
+      'price': price,
+      'onSale': sale,
+      'dateUpdated': DateTime.now(),
+      'userId': uid,
+    });
+  }
+
+  //add tags to item
+  Future<void> addTag(String tag, String itemId) async {
+    return await FirebaseFirestore.instance
+        .collection('item')
+        .doc(itemId)
+        .update({
+      'tags': FieldValue.arrayUnion([tag]),
+    });
+  }
+
   //add to cart function
   Future addToCart(String itemId, String name, String image, int quantity,
       String barcode) async {
