@@ -35,7 +35,6 @@ class _BarcodeScanState extends State<BarcodeScan> {
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
     if (!mounted) return;
-
     setState(() {
       scanResult = barcodeScanRes;
     });
@@ -45,6 +44,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
 
+    //function for update item button, return a bottom sheet
     void _showUpdateForm(String storeId, String itemId) {
       showModalBottomSheet(
           context: context,
@@ -58,6 +58,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
           });
     }
 
+    //function for add tag button, return a bottom sheet
     void _showTagsForm() {
       showModalBottomSheet(
           context: context,
@@ -78,6 +79,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
         ),
         Text(scanResult),
         Flexible(
+          //get current user stream to get prefered store info
           child: StreamBuilder<DocumentSnapshot>(
               stream: DatabaseService(uid: user.uid).getUserStream(),
               builder: (context, snapshot) {
@@ -94,12 +96,23 @@ class _BarcodeScanState extends State<BarcodeScan> {
                 String storeZipcode = data['preferredLocation.zipCode'];
 
                 return scanResult == ''
-                    ? Text(
-                        'no item is scanned yet, you are at $storeName with zipcode $storeZipcode')
+                    ? Column(
+                        children: [
+                          Text('no item is scanned yet'),
+                          Text(
+                              'Your location: $storeName with zipcode $storeZipcode'),
+                        ],
+                      )
                     : StreamBuilder<QuerySnapshot>(
                         stream: DatabaseService()
                             .getStoreItemStream(storeId, scanResult),
                         builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Text('Loading');
+                          }
+                          if (snapshot.data.docs.isEmpty) {
+                            return Text('no item found for this barcode');
+                          }
                           if (snapshot.hasError) {
                             return Text('Something went wrong');
                           }
@@ -111,8 +124,10 @@ class _BarcodeScanState extends State<BarcodeScan> {
                           return ListView.builder(
                               itemCount: snapshot.data.docs.length,
                               itemBuilder: (context, index) {
+                                //stream to get storeItem's info
                                 DocumentSnapshot data =
                                     snapshot.data.docs[index];
+                                //stream to get storeItem's update user info
                                 var userUpdateId = data['userId'];
                                 var itemId = data.id;
 
