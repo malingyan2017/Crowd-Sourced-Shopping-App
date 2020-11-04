@@ -22,7 +22,29 @@ class DatabaseService {
   final CollectionReference itemCollection =
       FirebaseFirestore.instance.collection(DatabaseConstants.items);
 
-  // update storeItem
+  //get user rank by lingyan
+  String getUserRank(int points) {
+    if (points < 5) {
+      return 'Novice';
+    } else if (points < 10) {
+      return 'JourneyMan';
+    } else {
+      return 'Master';
+    }
+  }
+
+  //update user rankPoints by lingyan
+  Future<void> updateRankPoints(int points, String uid) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'rankPoints': FieldValue.increment(points),
+      });
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  // update storeItem by lingyan
   Future<void> updateItem(String storeId, String itemId, double price,
       bool sale, String uid) async {
     return await FirebaseFirestore.instance
@@ -38,7 +60,7 @@ class DatabaseService {
     });
   }
 
-  //add tags to item
+  //add tags to item by lingyan
   Future<void> addTag(String tag, String itemId) async {
     return await FirebaseFirestore.instance
         .collection('item')
@@ -48,7 +70,7 @@ class DatabaseService {
     });
   }
 
-  //add to cart function
+  //add to cart function by lingyan
   Future addToCart(String itemId, String name, String image, int quantity,
       String barcode) async {
     return await FirebaseFirestore.instance
@@ -65,6 +87,7 @@ class DatabaseService {
     });
   }
 
+  //gte store info by lingyan
   Future<DocumentSnapshot> gotStoreInfo(String storeId) async {
     var result = await FirebaseFirestore.instance
         .collection('stores')
@@ -74,7 +97,7 @@ class DatabaseService {
     return result;
   }
 
-  //create if not there or update the user data in data base
+  //create if not there or update the user data in data base by lingyan
   Future updateUsers(String username, int rank, String location) async {
     return await userCollection.doc(uid).set({
       'username': username,
@@ -265,28 +288,27 @@ class DatabaseService {
   // Returns the user's shopping list as a stream.
   Stream<QuerySnapshot> getShoppingList() {
     return userCollection
-      .doc(uid)
-      .collection(DatabaseConstants.shoppingList)
-      .snapshots();
+        .doc(uid)
+        .collection(DatabaseConstants.shoppingList)
+        .snapshots();
   }
 
   Future<void> removeShoppingListItem(String listItemId) {
-
     return userCollection
-      .doc(uid)
-      .collection(DatabaseConstants.shoppingList)
-      .doc(listItemId)
-      .delete();
+        .doc(uid)
+        .collection(DatabaseConstants.shoppingList)
+        .doc(listItemId)
+        .delete();
   }
 
-  Future<void> updateShoppingListItemQuantity({String listItemId, int quantity}) {
-
+  Future<void> updateShoppingListItemQuantity(
+      {String listItemId, int quantity}) {
     return FirebaseFirestore.instance
-      .collection(DatabaseConstants.users)
-      .doc(uid)
-      .collection(DatabaseConstants.shoppingList)
-      .doc(listItemId)
-      .update({'quantity': quantity});
+        .collection(DatabaseConstants.users)
+        .doc(uid)
+        .collection(DatabaseConstants.shoppingList)
+        .doc(listItemId)
+        .update({'quantity': quantity});
   }
 
   // Get all stores as a query snapshot.
@@ -300,12 +322,12 @@ class DatabaseService {
       Map<String, dynamic> store = snapshot.data();
 
       return Store(
-        id: snapshot.id,
-        name: store['name'],
-        streetAddress: store['streetAddress'],
-        city: store['city'],
-        state: store['state'],
-        zipCode: store['zipCode']);
+          id: snapshot.id,
+          name: store['name'],
+          streetAddress: store['streetAddress'],
+          city: store['city'],
+          state: store['state'],
+          zipCode: store['zipCode']);
     }).toList();
   }
 

@@ -145,6 +145,11 @@ class _BarcodeScanState extends State<BarcodeScan> {
                                       }
                                       var data1 = snapshot.data;
                                       String userUpdateName = data1['username'];
+                                      int userUpdatePoints =
+                                          data1['rankPoints'];
+                                      String userUpdateRank =
+                                          DatabaseService(uid: user.uid)
+                                              .getUserRank(userUpdatePoints);
                                       return Card(
                                         child: Row(
                                           children: [
@@ -168,7 +173,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
                                                 Text('name: ${data['name']}'),
                                                 Text('price: ${data['price']}'),
                                                 Text(
-                                                    'update by: $userUpdateName'),
+                                                    'update by: $userUpdateName <$userUpdateRank>'),
                                                 Text(
                                                     'updated: ${data['dateUpdated'].toDate().toString()}'),
                                                 Text(

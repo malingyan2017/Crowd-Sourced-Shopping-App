@@ -13,7 +13,6 @@ class SideDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     const String noPreferredStore = 'A store has not been selected.';
     //CollectionReference myUser = FirebaseFirestore.instance.collection('users');
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
@@ -26,74 +25,75 @@ class SideDrawer extends StatelessWidget {
     );
 
     Text userInfoText(String text) {
-
       return Text(
-        text, 
+        text,
         style: userInfoStyle,
       );
     }
 
     Widget userStream = StreamBuilder(
-      stream: db.getUserStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
-        else if (snapshot.hasData) {
-          Map<String, dynamic> data = snapshot.data.data();
-          Store preferredStore;
+        stream: db.getUserStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          } else if (snapshot.hasData) {
+            Map<String, dynamic> data = snapshot.data.data();
+            Store preferredStore;
+            int userPoints = data['rankPoints'];
+            String userRank = DatabaseService(uid: auth.currentUser.uid)
+                .getUserRank(userPoints);
 
-          if (data['preferredLocation'] != null) {
-            preferredStore = Store.storeFromMap(data['preferredLocation']);
-          }
-          
-          // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Container(
-                  child: Icon(
-                    Icons.account_circle,
-                    color: Colors.black,
-                    size: 50,
+            if (data['preferredLocation'] != null) {
+              preferredStore = Store.storeFromMap(data['preferredLocation']);
+            }
+
+            // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Container(
+                    child: Icon(
+                      Icons.account_circle,
+                      color: Colors.black,
+                      size: 50,
+                    ),
                   ),
                 ),
-              ),
-              Flexible(
-                child: Container(child: userInfoText('Username: ${data['username']}'))
-              ),
-              Flexible(
-                child: Container(child: userInfoText('Rank: ${data['rank']}'))
-              ),
-              Flexible(
-                flex: 2,
-                child: Container(
-                  child: preferredStore == null 
-                  ? userInfoText('Store: $noPreferredStore')
-                  : userInfoText('Store: ${preferredStore.fullAddress}')
-                )
-              )
-            ],
-          );
-        }
-        return Text("loading");
-      }
-    );
+                Flexible(
+                    child: Container(
+                        child: userInfoText('Username: ${data['username']}'))),
+                Flexible(
+                  child: Container(
+                    child: userInfoText('Rank : $userRank'),
+                  ),
+                ),
+                //child: userInfoText('Rank: ${data['rank']}'))),
+                Flexible(
+                    flex: 2,
+                    child: Container(
+                        child: preferredStore == null
+                            ? userInfoText('Store: $noPreferredStore')
+                            : userInfoText(
+                                'Store: ${preferredStore.fullAddress}')))
+              ],
+            );
+          }
+          return Text("loading");
+        });
 
-    return new Drawer( 
+    return new Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           Container(
-            height: _userPaneSize(context),
-            child: DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue[200],
-              ),
-              child: userStream,
-            )
-          ),
+              height: _userPaneSize(context),
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue[200],
+                ),
+                child: userStream,
+              )),
           ListTile(
             title: Row(
               children: <Widget>[
@@ -108,8 +108,9 @@ class SideDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UpdateLocation(preferredStore: preferredStore,)
-                ),
+                    builder: (context) => UpdateLocation(
+                          preferredStore: preferredStore,
+                        )),
               );
             },
           ),
@@ -151,10 +152,9 @@ class SideDrawer extends StatelessWidget {
 
 // https://stackoverflow.com/questions/51284589/flutter-how-to-know-the-device-is-deviceorientation-is-up-or-down
 double _userPaneSize(BuildContext context) {
-
   Orientation orientation = MediaQuery.of(context).orientation;
 
   return orientation == Orientation.portrait
-  ? Measure.screenHeightFraction(context, .4)
-  : Measure.screenHeightFraction(context, .6);
+      ? Measure.screenHeightFraction(context, .4)
+      : Measure.screenHeightFraction(context, .6);
 }

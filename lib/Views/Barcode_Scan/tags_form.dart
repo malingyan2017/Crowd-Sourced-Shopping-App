@@ -67,6 +67,8 @@ class _TagsFormState extends State<TagsForm> {
                                 if (_formKey.currentState.validate()) {
                                   await DatabaseService().addTag(_tag, itemId);
                                 }
+                                await DatabaseService(uid: user.uid)
+                                    .updateRankPoints(1, user.uid);
                               })
                         ],
                       ))

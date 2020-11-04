@@ -80,6 +80,9 @@ class _UpdateFormState extends State<UpdateForm> {
                       saleOrNot,
                       user.uid);
                 }
+
+                await DatabaseService(uid: user.uid)
+                    .updateRankPoints(1, user.uid);
                 Navigator.pop(context);
               })
         ],
