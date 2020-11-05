@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shopping_app/Constants/database_constants.dart';
-
 import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
+
+// Class to store information to be used across various pages/widgets in the Reviews features
+class StoreData {
+  String sId;
+  String uid;
+  StoreData({this.sId, this.uid});
+}
 
 class DatabaseService {
   final String uid;
@@ -158,6 +164,14 @@ class DatabaseService {
         .snapshots();
   }
 
+  Stream<QuerySnapshot> getStoreReviewsStream(String locationId) {
+    return storeCollection
+        .doc(locationId)
+        .collection('reviews')
+        .orderBy('date_created', descending: true)
+        .snapshots();
+  }
+
   Future<DocumentSnapshot> getStoreSnapshot(String storeId) {
     return storeCollection.doc(storeId).get();
   }
@@ -256,9 +270,9 @@ class DatabaseService {
   // Throws an exception if the add fails.
   Future<void> addStoreReview(String storeId, Review review) async {
     storeCollection.doc(storeId).collection('reviews').add({
-      'userId': uid,
+      'user_id': uid,
       'rating': review.rating,
-      'dateWritten': review.dateCreated,
+      'date_created': review.dateCreated,
       'body': review.body
     });
 

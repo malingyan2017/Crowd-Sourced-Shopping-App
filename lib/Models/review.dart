@@ -1,5 +1,4 @@
 class Review {
-
   String id;
   String userId;
   int rating;
