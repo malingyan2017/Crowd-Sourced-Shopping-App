@@ -1,4 +1,4 @@
-class Item {
+class ListItem {
 
   String itemId;
   String barcode;
@@ -6,7 +6,7 @@ class Item {
   String pictureUrl;
   List<String> tags = [];
 
-  Item(
+  ListItem(
     {
       this.itemId,
       this.barcode, 

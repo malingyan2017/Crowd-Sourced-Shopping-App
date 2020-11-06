@@ -24,7 +24,7 @@ class _BaseAppState extends State<BaseApp> {
     SearchPage(),
     BarcodeScan(),
     Reviews(),
-    ShoppingList()
+    // ShoppingList()
   ];
 
   List<String> _appBarTitles = <String>[
@@ -32,7 +32,7 @@ class _BaseAppState extends State<BaseApp> {
     'Search',
     'Scan Item',
     'Reviews',
-    'Shopping List'
+    // 'Shopping List'
   ];
 
   void _onItemTap(int index) {
@@ -90,14 +90,14 @@ class _BaseAppState extends State<BaseApp> {
               ),
               label: 'Reviews',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.shopping_cart,
-                color: Colors.black,
-                size: 32,
-              ),
-              label: 'Shopping List',
-            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(
+            //     Icons.shopping_cart,
+            //     color: Colors.black,
+            //     size: 32,
+            //   ),
+            //   label: 'Shopping List',
+            // ),
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTap,

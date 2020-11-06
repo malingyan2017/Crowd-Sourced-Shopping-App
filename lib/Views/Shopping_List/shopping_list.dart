@@ -6,6 +6,7 @@ import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/list_item.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Util/measure.dart';
+import 'package:shopping_app/Views/Home/home_main.dart';
 
 // Most of the structure for the ui was adapted from Lingyan's work in 
 // the item search page.
@@ -16,49 +17,65 @@ class ShoppingList extends StatefulWidget {
 
 class _ShoppingListState extends State<ShoppingList> {
 
+  static const String title = 'Shopping List';
+
   @override
   Widget build(BuildContext context) {
 
     final user = Provider.of<TheUser>(context);
     DatabaseService db = DatabaseService(uid: user.uid);
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: db.getShoppingList(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+          icon: Icon(Icons.home),
+          iconSize: 32,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        ],
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: db.getShoppingList(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
 
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
-        else if (snapshot.hasData) {
-          //Map<String, dynamic> data = snapshot.data.data();
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          else if (snapshot.hasData) {
+            //Map<String, dynamic> data = snapshot.data.data();
 
-          return snapshot.data.docs.length == 0
-          ? _EmptyCart()
-          : ListView.builder(
-            itemCount: snapshot.data.docs.length,
-            itemBuilder: (BuildContext context, int index) {
-              DocumentSnapshot document = snapshot.data.docs[index];
-              Map<String, dynamic> data = document.data();
-              ListItem item = ListItem(
-                listItemId: document.id, 
-                itemId: data['itemId'],
-                barcode: data['barcode'],
-                name: data['name'],
-                pictureUrl: data['image'],
-                quantity: data['quantity']
-              );
+            return snapshot.data.docs.length == 0
+            ? _EmptyCart()
+            : ListView.builder(
+              itemCount: snapshot.data.docs.length,
+              itemBuilder: (BuildContext context, int index) {
+                DocumentSnapshot document = snapshot.data.docs[index];
+                Map<String, dynamic> data = document.data();
+                ListItem item = ListItem(
+                  listItemId: document.id, 
+                  itemId: data['itemId'],
+                  barcode: data['barcode'],
+                  name: data['name'],
+                  pictureUrl: data['image'],
+                  quantity: data['quantity']
+                );
 
-              return _ListItemCard(item: item,);
-            }
-          );
-        }
-        else {
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
-        }
-      },
+                return _ListItemCard(item: item,);
+              },
+            );
+          }
+          else {
+            return CenteredLoadingCircle(
+              height: Measure.screenHeightFraction(context, .2),
+              width: Measure.screenWidthFraction(context, .4),
+            );
+          }
+        },
+      ),
     );
   }
 }

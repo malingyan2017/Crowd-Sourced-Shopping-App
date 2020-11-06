@@ -2,11 +2,11 @@ import 'package:shopping_app/Models/item.dart';
 
 class ShoppingList {
 
-  List<Item> items = [];
+  List<ListItem> items = [];
 
   ShoppingList({this.items});
 
-  void addItem(Item item) {
+  void addItem(ListItem item) {
     
     items.add(item);
   }

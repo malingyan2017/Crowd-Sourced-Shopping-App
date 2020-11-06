@@ -1,6 +1,6 @@
 import 'package:shopping_app/Models/item.dart';
 
-class StoreItem extends Item {
+class StoreItem extends ListItem {
 
   String storeItemId;
   double price;
