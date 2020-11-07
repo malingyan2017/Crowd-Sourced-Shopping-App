@@ -6,7 +6,7 @@ import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/list_item.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Util/measure.dart';
-import 'package:shopping_app/Views/Home/home_main.dart';
+import 'package:shopping_app/Views/Compare/compare.dart';
 
 // Most of the structure for the ui was adapted from Lingyan's work in 
 // the item search page.
@@ -17,7 +17,8 @@ class ShoppingList extends StatefulWidget {
 
 class _ShoppingListState extends State<ShoppingList> {
 
-  static const String title = 'Shopping List';
+  // static const String title = 'Shopping List';
+  int itemCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +26,92 @@ class _ShoppingListState extends State<ShoppingList> {
     final user = Provider.of<TheUser>(context);
     DatabaseService db = DatabaseService(uid: user.uid);
 
+    return StreamBuilder<QuerySnapshot>(
+      stream: db.getShoppingList(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+
+        Widget bodyToReturn;
+        Widget buttonToReturn;
+
+        if (snapshot.hasError) {
+          bodyToReturn = Text("Something went wrong");
+          // return _ScaffoldTemplate(body: Text("Something went wrong"));
+        }
+        else if (snapshot.hasData) {
+          //Map<String, dynamic> data = snapshot.data.data();
+
+          itemCount = snapshot.data.docs.length;
+
+          bodyToReturn = itemCount == 0 
+            ? _EmptyCart() 
+            : _shoppingListView(itemCount, snapshot);
+          
+          buttonToReturn = itemCount == 0
+            ? null
+            : _compareButton(context);
+        }
+        else {
+          bodyToReturn = CenteredLoadingCircle(
+            height: Measure.screenHeightFraction(context, .2),
+            width: Measure.screenWidthFraction(context, .4),
+          );
+        }
+
+        return _ScaffoldTemplate(
+          body: bodyToReturn, 
+          button: buttonToReturn,
+        );
+      },
+    );
+  }
+
+  Widget _shoppingListView(int itemCount, AsyncSnapshot<QuerySnapshot> snapshot) {
+
+    return ListView.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
+        DocumentSnapshot document = snapshot.data.docs[index];
+        Map<String, dynamic> data = document.data();
+        ListItem item = ListItem(
+          listItemId: document.id, 
+          itemId: data['itemId'],
+          barcode: data['barcode'],
+          name: data['name'],
+          pictureUrl: data['image'],
+          quantity: data['quantity']
+        );
+
+        return _ListItemCard(item: item,);
+      },
+    );
+  }
+
+  Widget _compareButton(BuildContext context) {
+
+    return ElevatedButton(
+      child: Text('Compare'),
+      onPressed: () {
+        Navigator.push(context, 
+          MaterialPageRoute(
+            builder: (context) => Compare()
+          )
+        );
+      },
+    );
+  }
+}
+
+class _ScaffoldTemplate extends StatelessWidget {
+
+  static const String title = 'Shopping List';
+
+  final Widget body;
+  final Widget button;
+
+  _ScaffoldTemplate({Key key, this.body, this.button}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -38,44 +125,8 @@ class _ShoppingListState extends State<ShoppingList> {
         ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: db.getShoppingList(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-
-          if (snapshot.hasError) {
-            return Text("Something went wrong");
-          }
-          else if (snapshot.hasData) {
-            //Map<String, dynamic> data = snapshot.data.data();
-
-            return snapshot.data.docs.length == 0
-            ? _EmptyCart()
-            : ListView.builder(
-              itemCount: snapshot.data.docs.length,
-              itemBuilder: (BuildContext context, int index) {
-                DocumentSnapshot document = snapshot.data.docs[index];
-                Map<String, dynamic> data = document.data();
-                ListItem item = ListItem(
-                  listItemId: document.id, 
-                  itemId: data['itemId'],
-                  barcode: data['barcode'],
-                  name: data['name'],
-                  pictureUrl: data['image'],
-                  quantity: data['quantity']
-                );
-
-                return _ListItemCard(item: item,);
-              },
-            );
-          }
-          else {
-            return CenteredLoadingCircle(
-              height: Measure.screenHeightFraction(context, .2),
-              width: Measure.screenWidthFraction(context, .4),
-            );
-          }
-        },
-      ),
+      body: body,
+      persistentFooterButtons: [button], 
     );
   }
 }
@@ -91,19 +142,12 @@ class _EmptyCart extends StatelessWidget {
   }
 }
 
-class _ListItemCard extends StatefulWidget {
+class _ListItemCard extends StatelessWidget {
 
+  static const String itemRemovalErrorMessage = 'Error removing item from cart.';
   final ListItem item;
 
   _ListItemCard({Key key, this.item}) : super(key: key);
-
-  @override
-  _ListItemCardState createState() => _ListItemCardState();
-}
-
-class _ListItemCardState extends State<_ListItemCard> {
-
-  static const String itemRemovalErrorMessage = 'Error removing item from cart.';
 
   @override
   Widget build(BuildContext context) {
@@ -122,25 +166,25 @@ class _ListItemCardState extends State<_ListItemCard> {
             image: DecorationImage(
               fit: BoxFit.fill,
               image: NetworkImage(
-                widget.item.pictureUrl
+                item.pictureUrl
               ),
             ),
           ),
         ),
         //Image.network(widget.item.pictureUrl),
         title: Text(
-          '${widget.item.name}',
+          '${item.name}',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: _ListItemDropDownButton(
-          item: widget.item,
+          item: item,
         ),   
         trailing: RaisedButton(
           child: Text('Remove'),
           onPressed: () async {
             try {
-              await db.removeShoppingListItem(widget.item.listItemId);
+              await db.removeShoppingListItem(item.listItemId);
             }
             catch (error){
               Scaffold.of(context).showSnackBar(
