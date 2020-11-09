@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Models/review.dart';
+import 'package:shopping_app/Views/Common/base_app.dart';
 
 // References: https://pub.dev/packages/flutter_rating_bar
 // https://flutter.dev/docs/cookbook/forms/validation
@@ -22,9 +23,25 @@ class AddReview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTitle),
+        iconTheme: IconThemeData(color: Colors.black),
+        title: Text(
+          appBarTitle,
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
         backgroundColor: Colors.blue[200],
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home),
+            iconSize: 32,
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => BaseApp()));
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: <Widget>[
@@ -67,6 +84,9 @@ class MyCustomFormState extends State<MyCustomForm> {
           dateCreated: DateTime.now());
       // If data is valid, add data into database
       db.addStoreReview(data.sId, reviewData);
+
+      // Update Rank points by 1 for every new review
+      db.updateRankPoints(1, reviewData.userId);
 
       /* Scaffold.of(context).showSnackBar(SnackBar(
           content: Text('A Review has been Added.'),

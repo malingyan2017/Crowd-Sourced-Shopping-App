@@ -1,310 +1,246 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:shopping_app/Components/centered_loading_circle.dart';
 import 'package:shopping_app/Database/database.dart';
-import 'package:shopping_app/Views/Reviews/add_review.dart';
-
-// https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
-// https://flutterawesome.com/a-simple-ratingbar-for-flutter-which-also-include-a-rating-bar-indicator/
+import 'package:shopping_app/Models/store.dart';
+import 'package:shopping_app/Util/measure.dart';
+import 'package:shopping_app/Views/Reviews/reviews_display.dart';
 
 class Reviews extends StatelessWidget {
+  static const String routeName = '/editLocation';
+  static const String appBarTitle = 'Edit Location';
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final Store preferredStore;
+
+  Reviews({Key key, this.preferredStore}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference myUser = FirebaseFirestore.instance.collection('users');
-
-    // Text Widget for to Bold username
-    Text reviewInfoText(String text) {
-      return Text(
-        text,
-        style: TextStyle(
-          color: Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      );
-    }
-
-    // Widget to style store data such as name and address
-    Padding storeText(String text) {
-      return Padding(
-        padding: EdgeInsets.only(top: 10.0, left: 10.0),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.grey[850],
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-
-    // Widget for error message styling
-    Padding errorMessages(String text) {
-      return Padding(
-        padding: EdgeInsets.only(top: 10.0, left: 10.0),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.redAccent[700],
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-
-    // Widget to run query to retrieve location info such as store name, address, city and zip code
-    Widget getLocation(String locationID) {
-      var userData =
-          FirebaseFirestore.instance.collection('stores').doc(locationID).get();
-
-      return FutureBuilder<DocumentSnapshot>(
-          future: userData,
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            String message;
-            if (snapshot.hasError) {
-              message = "Something went wrong Location Info";
-            }
-
-            if (snapshot.hasData &&
-                snapshot.hasData &&
-                snapshot.connectionState == ConnectionState.done) {
-              Map<String, dynamic> locationData = snapshot.data.data();
-              message = locationData['name'] +
-                  '\n' +
-                  locationData['streetAddress'] +
-                  '\n' +
-                  locationData['city'] +
-                  ', ' +
-                  locationData['state'] +
-                  ' ' +
-                  locationData['zipCode'];
-            } else {
-              message = "LOADING";
-            }
-
-            return storeText(message);
-          });
-    }
-
-    // Widget for the header bar that contains store information and the add review button
-    Widget reviewHeader(String locationID, StoreData storedata) {
-      return Container(
-        height: 75,
-        width: double.infinity,
-        color: Colors.grey[300],
-        child: Stack(
-          children: <Widget>[
-            getLocation(locationID),
-            Padding(
-              padding: EdgeInsets.only(top: 10.0, left: 275),
-              child: FlatButton.icon(
-                textColor: Colors.black,
-                color: Colors.blue[200],
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddReview(data: storedata)),
-                  );
-                },
-                icon: Icon(Icons.add, size: 18),
-                label: Text("Add Review"),
-              ),
-            ),
-            // In case I add average reviews feature on the header bar (TBD)
-            /*Padding(
-              padding: EdgeInsets.only(top: 70.0, left: 10),
-              child: Text(
-                'Average Rating:',
-                style: TextStyle(
-                  color: Colors.grey[850],
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 65.0, left: 125.0),
-              child: RatingBarIndicator(
-                itemBuilder: (context, _) => Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
-                rating: 5,
-                itemCount: 5,
-                itemSize: 25.0,
-              ),
-            ),*/
-          ],
-        ),
-      );
-    }
-
-    // Widget to retrieve user information such as rank and username for the individual review
-    Widget getUserInfo(DocumentSnapshot data) {
-      var userData = FirebaseFirestore.instance
-          .collection('users')
-          .doc(data['user_id'])
-          .get();
-
-      return FutureBuilder<DocumentSnapshot>(
-          future: userData,
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            String message;
-            if (snapshot.hasError) {
-              message = "Something went wrong";
-            }
-            if (snapshot.hasData &&
-                snapshot.connectionState == ConnectionState.done) {
-              Map<String, dynamic> userData = snapshot.data.data();
-
-              message = userData['username'] +
-                  ' (rank: ' +
-                  userData['rank'].toString() +
-                  ')';
-            } else {
-              message = "LOADING";
-            }
-            return reviewInfoText(message);
-          });
-    }
+    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
 
     return Scaffold(
-      // Stream builder to review the user's preferred store location ID, so that 
-      // the reviews for that store can be retrieved 
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: myUser.doc(auth.currentUser.uid).snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.active &&
-              snapshot.hasError) {
-            return Text("Something went wrong user");
+      body: FutureBuilder<QuerySnapshot>(
+        future: db.getStoreListQuery(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            List<Store> storeList = db.queryToStoreList(snapshot.data.docs);
+
+            return _StoreDropDown(
+              storeList: storeList,
+              preferredStore: preferredStore,
+            );
+          } else {
+            return CenteredLoadingCircle(
+              height: Measure.screenHeightFraction(context, .2),
+              width: Measure.screenWidthFraction(context, .4),
+            );
           }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasData) {
-            Map<String, dynamic> userdata = snapshot.data.data();
-            String storeId;
-            if (userdata['preferredLocation'] != null) {
-              storeId = userdata['preferredLocation']['id'];
-              debugPrint('my location: ');
-              debugPrint(storeId);
-            }
-
-            if (storeId == '' || storeId == null) {
-              return errorMessages(
-                  'A store has not been selected. Please navigate to the side drawer to edit your location.');
-            } else {
-              var data = StoreData(sId: storeId, uid: auth.currentUser.uid);
-
-              // Stream builder to listen to latest user reviews that have been added
-              return StreamBuilder<QuerySnapshot>(
-                stream: DatabaseService().getStoreReviewsStream(storeId),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active &&
-                      snapshot.hasError) {
-                    return Text("Something went wrong review stream");
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasData) {
-                    int numReviews = snapshot.data.docs.length;
-                    print(numReviews);
-
-                    return Container(
-                      child: Stack(
-                        children: <Widget>[
-                          reviewHeader(storeId, data),
-                          Padding(
-                            padding: EdgeInsets.only(top: 85.0),
-                            child: ListView.builder(
-                              itemCount: snapshot.data.docs.length,
-                              itemBuilder: (context, index) {
-                                DocumentSnapshot revdata =
-                                    snapshot.data.docs[index];
-                                print(revdata);
-
-                                // Variables for user rating and formatted date stamp for review
-                                int rating = revdata['rating'];
-                                Timestamp timestamp = revdata['date_created'];
-                                DateTime myDateTime = DateTime.parse(
-                                    timestamp.toDate().toString());
-                                String formattedDateTime =
-                                    DateFormat('MM-dd-yyyy').format(myDateTime);
-
-                                return SizedBox(
-                                  child: Card(
-                                    child: Stack(
-                                      children: <Widget>[
-                                        Row(
-                                          children: <Widget>[
-                                            Icon(
-                                              Icons.account_circle,
-                                              size: 60.0,
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  left: 8.0, bottom: 25.0),
-                                              child: Stack(
-                                                children: <Widget>[
-                                                  getUserInfo(revdata),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Positioned(
-                                          top: 10,
-                                          right: 3,
-                                          child: Stack(
-                                            children: <Widget>[
-                                              Text('$formattedDateTime'),
-                                            ],
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 65.0, top: 27.0),
-                                          child: RatingBarIndicator(
-                                            itemBuilder: (context, _) => Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                            ),
-                                            rating: rating.toDouble(),
-                                            itemCount: 5,
-                                            itemSize: 17.0,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 10.0, top: 70.0),
-                                          child: Text('${revdata['body']}\n'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return Center(child: CircularProgressIndicator());
-                },
-              );
-            }
-          }
-          return Center(child: CircularProgressIndicator());
         },
       ),
     );
+  }
+}
+
+// Logic from "edit_location" written by Rene Arana
+// https://api.flutter.dev/flutter/material/DropdownButton-class.html
+class _StoreDropDown extends StatefulWidget {
+  final List<Store> storeList;
+  final Store preferredStore;
+
+  _StoreDropDown({Key key, this.storeList, this.preferredStore})
+      : super(key: key);
+
+  @override
+  _StoreDropDownState createState() => _StoreDropDownState();
+}
+
+class _StoreDropDownState extends State<_StoreDropDown> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  String generalAddressValue;
+  String storeAddressValue;
+  List<String> uniqueGeneralAddresses;
+  List<Store> matchingStores;
+  String submitMessage;
+
+  bool locationSaved = false;
+  bool errorOccurred = false;
+
+  static String saveSuccessMessage = 'Your location has been saved.';
+  static String errorMessage = 'There was an error saving your location.';
+
+  @override
+  void initState() {
+    uniqueGeneralAddresses = uniqueCityStateZip();
+    String startingGeneralAddress =
+        widget.preferredStore?.cityStateZip ?? uniqueGeneralAddresses[0];
+    generalAddressValue = startingGeneralAddress;
+
+    matchingStores = allMatchingStores(generalAddressValue);
+    storeAddressValue = widget.preferredStore?.nameWithStreetAddress ??
+        matchingStores[0].nameWithStreetAddress;
+
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double itemHeight = 0.13;
+
+    List<Widget> columnChildren = [
+      Text('Location'),
+      DropdownButton(
+          itemHeight: Measure.screenHeightFraction(context, itemHeight),
+          isExpanded: true,
+          underline: Container(
+            height: 2,
+            color: Colors.blueGrey,
+          ),
+          value: generalAddressValue,
+          items: uniqueGeneralAddresses.map<DropdownMenuItem<String>>((value) {
+            return DropdownMenuItem(value: value, child: Text(value));
+          }).toList(),
+          onChanged: (String newValue) {
+            generalAddressValue = newValue;
+            matchingStores = allMatchingStores(generalAddressValue);
+            storeAddressValue = matchingStores[0].nameWithStreetAddress;
+            locationSaved = false;
+            errorOccurred = false;
+            setState(() {});
+          }),
+      Padding(padding: EdgeInsets.all(10)),
+      Text('Find Store'),
+      DropdownButton(
+        itemHeight: Measure.screenHeightFraction(context, itemHeight),
+        isExpanded: true,
+        underline: Container(
+          height: 2,
+          color: Colors.blueGrey,
+        ),
+        value: storeAddressValue,
+        items: matchingStores.map<DropdownMenuItem<String>>((Store store) {
+          String nameWithStreetAddress = store.nameWithStreetAddress;
+
+          return DropdownMenuItem<String>(
+              value: nameWithStreetAddress, child: Text(nameWithStreetAddress));
+        }).toList(),
+        onChanged: (String newValue) {
+          setState(() {
+            locationSaved = false;
+            errorOccurred = false;
+            storeAddressValue = newValue;
+          });
+        },
+      ),
+      Padding(padding: EdgeInsets.all(10)),
+      Row(
+        children: <Widget>[
+          FlatButton(
+              textColor: Colors.black,
+              color: Colors.blue[200],
+              onPressed: () async {
+                locationSaved = false;
+                errorOccurred = false;
+
+                Store newStore =
+                    getMatchingStore(storeAddressValue, generalAddressValue);
+                print(newStore.id);
+
+                var ldata =
+                    StoreData(sId: newStore.id, uid: auth.currentUser.uid);
+
+                if (newStore == null) {
+                  errorOccurred = true;
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => StoreReviews(ldata: ldata)),
+                  );
+                }
+
+                setState(() {});
+              },
+              child: Text('Go')),
+          /*IconButton(
+            icon: Icon(Icons.help),
+            iconSize: 25,
+            color: Colors.black54,
+            tooltip: 'Test',
+            onPressed: () {tooltip: 'Test',  },
+          ),*/
+          Tooltip(
+            message:
+                'Select a store location in order to display all the reviews and add a review for the selected store.',
+            height: 75,
+            margin: EdgeInsets.all(15.0),
+            child: IconButton(
+              icon: Icon(Icons.help),
+              iconSize: 25,
+              color: Colors.black54,
+              onPressed: () {
+                /* your code */
+              },
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    if (locationSaved || errorOccurred) {
+      Text message;
+
+      locationSaved
+          ? message =
+              Text(saveSuccessMessage, style: TextStyle(color: Colors.green))
+          : message = Text(errorMessage, style: TextStyle(color: Colors.red));
+
+      columnChildren.add(message);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: columnChildren,
+      ),
+    );
+  }
+
+  List<String> uniqueCityStateZip() {
+    List<String> unique = [];
+
+    widget.storeList.forEach((Store store) {
+      if (!unique.contains(store.cityStateZip)) {
+        unique.add(store.cityStateZip);
+      }
+    });
+
+    unique.sort();
+
+    return unique;
+  }
+
+  List<Store> allMatchingStores(String cityStateZip) {
+    List<Store> matches = widget.storeList
+        .where((store) => store.cityStateZip == cityStateZip)
+        .toList();
+
+    matches.sort(
+        (a, b) => a.nameWithStreetAddress.compareTo(b.nameWithStreetAddress));
+    return matches;
+  }
+
+  Store getMatchingStore(String nameWithStreetAddress, String cityStateZip) {
+    Store match = widget.storeList.firstWhere((Store store) {
+      return store.nameWithStreetAddress == nameWithStreetAddress &&
+          store.cityStateZip == cityStateZip;
+    }, orElse: () => null);
+
+    return match;
   }
 }
