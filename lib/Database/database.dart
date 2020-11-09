@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:shopping_app/Constants/database_constants.dart';
 import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/store.dart';
@@ -27,6 +28,37 @@ class DatabaseService {
 
   final CollectionReference itemCollection =
       FirebaseFirestore.instance.collection(DatabaseConstants.items);
+
+  //get rank icon by icon class, call this function directly where you need an icon
+  Icon getRankIcon(int points) {
+    if (points < 5) {
+      return Icon(
+        Icons.emoji_events,
+        color: Colors.brown,
+      );
+    } else if (points < 10) {
+      return Icon(
+        Icons.emoji_events,
+        color: Colors.grey,
+      );
+    } else {
+      return Icon(
+        Icons.emoji_events,
+        color: Colors.amber,
+      );
+    }
+  }
+
+  //get rank icon by url
+  String getRankIconUrl(int points) {
+    if (points < 5) {
+      return 'https://uago.at/-RYyC/sgim.svg';
+    } else if (points < 10) {
+      return 'https://uago.at/-8R_F/sgim.svg';
+    } else {
+      return 'https://uago.at/-nq6x/sgim.svg';
+    }
+  }
 
   //get user rank by lingyan
   String getUserRank(int points) {
@@ -104,11 +136,10 @@ class DatabaseService {
   }
 
   //create if not there or update the user data in data base by lingyan
-  Future updateUsers(String username, int rank, String location) async {
+  Future updateUsers(String username, int rank) async {
     return await userCollection.doc(uid).set({
       'username': username,
       'rankPoints': rank,
-      'location': location,
     });
   }
 
