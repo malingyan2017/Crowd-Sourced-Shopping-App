@@ -31,6 +31,7 @@ class _TagsFormState extends State<TagsForm> {
               var itemId = data.id;
               return Column(
                 children: [
+                  //DatabaseService(uid: user.uid).getRankIcon(4),
                   Text('Popular tags for this item:'),
                   Row(
                     children: [

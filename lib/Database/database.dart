@@ -23,7 +23,7 @@ class DatabaseService {
   final CollectionReference itemCollection =
       FirebaseFirestore.instance.collection(DatabaseConstants.items);
 
-  //get rank icon by icon class
+  //get rank icon by icon class, call this function directly where you need an icon
   Icon getRankIcon(int points) {
     if (points < 5) {
       return Icon(
@@ -130,11 +130,10 @@ class DatabaseService {
   }
 
   //create if not there or update the user data in data base by lingyan
-  Future updateUsers(String username, int rank, String location) async {
+  Future updateUsers(String username, int rank) async {
     return await userCollection.doc(uid).set({
       'username': username,
       'rankPoints': rank,
-      'location': location,
     });
   }
 
