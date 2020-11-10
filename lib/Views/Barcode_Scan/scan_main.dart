@@ -6,6 +6,7 @@ import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopping_app/Views/Barcode_Scan/scan_result.dart';
 import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
@@ -42,173 +43,30 @@ class _BarcodeScanState extends State<BarcodeScan> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<TheUser>(context);
-
-    //function for update item button, return a bottom sheet
-    void _showUpdateForm(String storeId, String itemId) {
-      showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Container(
-              child: UpdateForm(
-                storeId: storeId,
-                itemId: itemId,
-              ),
-            );
-          });
-    }
-
-    //function for add tag button, return a bottom sheet
-    void _showTagsForm() {
-      showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Container(
-              child: TagsForm(
-                barcode: scanResult,
-              ),
-            );
-          });
-    }
-
-    return Column(
-      children: [
-        RaisedButton(
-          onPressed: () => scanBarcode(),
-          child: Text("Start barcode scan"),
-        ),
-        Text(scanResult),
-        Flexible(
-          //get current user stream to get prefered store info
-          child: StreamBuilder<DocumentSnapshot>(
-              stream: DatabaseService(uid: user.uid).getUserStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Something went wrong');
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text("Loading");
-                }
-                var data = snapshot.data;
-                String storeId = data['preferredLocation.id'];
-                String storeName = data['preferredLocation.name'];
-                String storeZipcode = data['preferredLocation.zipCode'];
-
-                return scanResult == ''
-                    ? Column(
-                        children: [
-                          Text('no item is scanned yet'),
-                          Text(
-                              'Your location: $storeName with zipcode $storeZipcode'),
-                        ],
-                      )
-                    : StreamBuilder<QuerySnapshot>(
-                        stream: DatabaseService()
-                            .getStoreItemStream(storeId, scanResult),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Text('Loading');
-                          }
-                          if (snapshot.data.docs.isEmpty) {
-                            return Text('no item found for this barcode');
-                          }
-                          if (snapshot.hasError) {
-                            return Text('Something went wrong');
-                          }
-
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Text("Loading");
-                          }
-                          return ListView.builder(
-                              itemCount: snapshot.data.docs.length,
-                              itemBuilder: (context, index) {
-                                //stream to get storeItem's info
-                                DocumentSnapshot data =
-                                    snapshot.data.docs[index];
-                                //stream to get storeItem's update user info
-                                var userUpdateId = data['userId'];
-                                var itemId = data.id;
-
-                                return StreamBuilder<DocumentSnapshot>(
-                                    stream: DatabaseService(uid: userUpdateId)
-                                        .getUserStream(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasError) {
-                                        return Text('Something went wrong');
-                                      }
-
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Text("Loading");
-                                      }
-                                      var data1 = snapshot.data;
-                                      String userUpdateName = data1['username'];
-                                      int userUpdatePoints =
-                                          data1['rankPoints'];
-                                      String userUpdateRank =
-                                          DatabaseService(uid: user.uid)
-                                              .getUserRank(userUpdatePoints);
-                                      return Card(
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 60,
-                                              height: 60,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      data['pictureUrl']),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text('name: ${data['name']}'),
-                                                Text('price: ${data['price']}'),
-                                                Text(
-                                                    'update by: $userUpdateName <$userUpdateRank>'),
-                                                Text(
-                                                    'updated: ${data['dateUpdated'].toDate().toString()}'),
-                                                Text(
-                                                    'on sale: ${data['onSale']}')
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                RaisedButton(
-                                                  child: Text('update item'),
-                                                  onPressed: () =>
-                                                      _showUpdateForm(
-                                                          storeId, itemId),
-                                                ),
-                                                RaisedButton(
-                                                  child: Text('add tags'),
-                                                  onPressed: () =>
-                                                      _showTagsForm(),
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    });
-                              });
-                        });
-              }),
-        ),
-      ],
+    return StreamProvider<QuerySnapshot>.value(
+      value: DatabaseService().items,
+      child: Column(
+        children: [
+          SizedBox(height: 20),
+          FlatButton(
+            onPressed: () => scanBarcode(),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.qr_code,
+                  size: 60,
+                ),
+                Text('Scan Item'),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(scanResult),
+          ScanResult(
+            scan_result: scanResult,
+          ),
+        ],
+      ),
     );
   }
 }

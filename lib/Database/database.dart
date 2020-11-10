@@ -175,6 +175,10 @@ class DatabaseService {
     return userCollection.doc(uid).get();
   }
 
+  Stream<QuerySnapshot> get items {
+    return itemCollection.snapshots();
+  }
+
   Stream<DocumentSnapshot> getUserStream() {
     return userCollection.doc(uid).snapshots();
   }
