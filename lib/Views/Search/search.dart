@@ -80,17 +80,6 @@ class _SearchState extends State<Search> {
                                     data: data,
                                     docId: docId,
                                   ),
-                                  /*
-                                  RaisedButton(
-                                      child: Text('add to cart'),
-                                      onPressed: () async {
-                                        await DatabaseService(uid: user.uid)
-                                            .addToCart(
-                                          docId,
-                                          data['name'],
-                                          data['pictureUrl'],
-                                        );
-                                      }),*/
                                 ],
                               )
                             ],
