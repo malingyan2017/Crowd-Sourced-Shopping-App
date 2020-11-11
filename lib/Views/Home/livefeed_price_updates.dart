@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopping_app/Database/database.dart';
 
 // https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
 // https://github.com/flutter/flutter/issues/15928
 
 class LivePriceUpdates extends StatelessWidget {
+  final FirebaseAuth auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
+    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
     // Text Widget to Bold Item Text
     Text itemInfoText(String text) {
       return Text(
@@ -31,13 +35,13 @@ class LivePriceUpdates extends StatelessWidget {
       );
     }
 
+    // Variable to hold the query for latest store item updates
     var storeItems = FirebaseFirestore.instance
         .collectionGroup('storeItems')
-        //.where('dateUpdated', isLessThanOrEqualTo: DateTime.now())
         .orderBy('dateUpdated', descending: true)
         .limit(10);
 
-    // Widget to retrieve location info such as store name, city and zip code
+    // Widget to retrieve location info such as store name, city state, and zip code
     Widget getLocation(String locationID) {
       var userData =
           FirebaseFirestore.instance.collection('stores').doc(locationID).get();
@@ -59,6 +63,8 @@ class LivePriceUpdates extends StatelessWidget {
                   ' in ' +
                   locationData['city'] +
                   ', ' +
+                  locationData['state'] +
+                  ' ' +
                   locationData['zipCode'];
             } else {
               message = "LOADING";
@@ -84,12 +90,17 @@ class LivePriceUpdates extends StatelessWidget {
             if (snapshot.hasData &&
                 snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> userData = snapshot.data.data();
-              message = ('Updated By: ' +
-                  userData['username'] +
-                  ' ' +
-                  '(rank ' +
-                  userData['rank'].toString() +
-                  ')');
+
+              // Calculate User's rank and retrieve icon
+              int userPoints = userData['rankPoints'];
+              Icon icon = db.getRankIcon(userPoints);
+              String user = 'Updated by: ' + userData['username'] + ' ';
+
+              return Row(
+                children: <Widget>[
+                  Text(user), icon, //Text(rank)
+                ],
+              );
             } else {
               message = "LOADING";
             }
@@ -122,7 +133,7 @@ class LivePriceUpdates extends StatelessWidget {
 
                 // Variables to Hold Store Item Info
                 var itemName = data['name'];
-                var itemPrice = data['price'].toString();
+                var itemPrice = '\$' + data['price'].toString();
                 var onSale = data['onSale'];
                 var userId = data['userId'];
 
@@ -167,6 +178,7 @@ class LivePriceUpdates extends StatelessWidget {
                           top: 46,
                           child: Checkbox(
                             checkColor: Colors.black,
+                            onChanged: null,
                             value: onSale,
                           ),
                         ),
@@ -176,7 +188,7 @@ class LivePriceUpdates extends StatelessWidget {
                           child: Text('On Sale?'),
                         ),
                         Positioned(
-                          top: 50,
+                          top: 43,
                           right: 3,
                           child: getUserInfo(userId),
                         ),

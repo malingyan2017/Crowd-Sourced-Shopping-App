@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopping_app/Database/database.dart';
 
 // https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
 // https://flutterawesome.com/a-simple-ratingbar-for-flutter-which-also-include-a-rating-bar-indicator/
 // https://github.com/flutter/flutter/issues/15928
 
 class LiveReviews extends StatelessWidget {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
+    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
     // Text Widget for User Name Bolding
     Text reviewInfoText(String text) {
       return Text(
@@ -49,6 +54,8 @@ class LiveReviews extends StatelessWidget {
                   ' in ' +
                   locationData['city'] +
                   ', ' +
+                  locationData['state'] +
+                  ' ' +
                   locationData['zipCode'];
             } else {
               message = "LOADING";
@@ -72,19 +79,27 @@ class LiveReviews extends StatelessWidget {
             String message;
             if (snapshot.hasError) {
               message = "Something went wrong";
+              return reviewInfoText(message);
             }
             if (snapshot.hasData &&
                 snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> userData = snapshot.data.data();
 
-              message = userData['username'] +
-                  ' (rank: ' +
-                  userData['rank'].toString() +
-                  ')';
+              // Calculate User's rank and retrieve icon
+              int userPoints = userData['rankPoints'];
+              Icon icon = db.getRankIcon(userPoints);
+              String user = userData['username'] + ' ';
+
+              return Row(
+                children: <Widget>[
+                  reviewInfoText(user),
+                  icon,
+                ],
+              );
             } else {
               message = "LOADING";
+              return reviewInfoText(message);
             }
-            return reviewInfoText(message);
           });
     }
 
@@ -151,7 +166,6 @@ class LiveReviews extends StatelessWidget {
                             rating: rating.toDouble(),
                             itemCount: 5,
                             itemSize: 17.0,
-                            // emptyColor: Colors.amber.withAlpha(90),
                           ),
                         ),
                         Padding(
