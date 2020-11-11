@@ -23,6 +23,7 @@ class StoreReviews extends StatelessWidget {
   Widget build(BuildContext context) {
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
     String myCurrentUserId = auth.currentUser.uid;
+
     print('current user: $myCurrentUserId');
     // Text Widget to Bold username
     Text reviewInfoText(String text) {
@@ -48,20 +49,6 @@ class StoreReviews extends StatelessWidget {
         ),
       );
     }
-
-    // Widget for error message styling
-    /* Padding errorMessages(String text) {
-      return Padding(
-        padding: EdgeInsets.only(top: 10.0, left: 10.0),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.redAccent[700],
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }*/
 
     // Widget to run query to retrieve location info such as store name, address, city and zip code
     Widget getLocation(String locationID) {
@@ -99,9 +86,11 @@ class StoreReviews extends StatelessWidget {
     }
 
     // Widget for the header bar that contains store information and the add review button
-    Widget reviewHeader(String locationID, StoreData storedata) {
+    Widget reviewHeader(
+        String locationID, StoreData storedata, int ratingSum, int numReviews) {
+      double avgRatng = ratingSum / numReviews;
       return Container(
-        height: 75,
+        height: 100,
         width: double.infinity,
         color: Colors.grey[300],
         child: Stack(
@@ -124,28 +113,28 @@ class StoreReviews extends StatelessWidget {
               ),
             ),
             // In case I add average reviews feature on the header bar (TBD)
-            /*Padding(
-              padding: EdgeInsets.only(top: 70.0, left: 10),
+            Padding(
+              padding: EdgeInsets.only(top: 65.0, left: 10.0),
+              child: RatingBarIndicator(
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                rating: avgRatng,
+                itemCount: 5,
+                itemSize: 25.0,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 70.0, left: 140),
               child: Text(
-                'Average Rating:',
+                '($numReviews)',
                 style: TextStyle(
                   color: Colors.grey[850],
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(top: 65.0, left: 125.0),
-              child: RatingBarIndicator(
-                itemBuilder: (context, _) => Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
-                rating: 5,
-                itemCount: 5,
-                itemSize: 25.0,
-              ),
-            ),*/
           ],
         ),
       );
@@ -229,12 +218,23 @@ class StoreReviews extends StatelessWidget {
               int numReviews = snapshot.data.docs.length;
               print(numReviews);
 
+              // Get the sum of the total rating so that the average rating can be calculated
+              // https://stackoverflow.com/questions/62722560/how-to-calculate-the-sum-of-a-particular-field-of-all-the-documents-in-a-collect
+
+              var ds = snapshot.data.docs;
+              int totalRating = 0;
+              for (int i = 0; i < numReviews; i++) {
+                totalRating += (ds[i]['rating']);
+              }
+
+              print('rating sum $totalRating');
+
               return Container(
                 child: Stack(
                   children: <Widget>[
-                    reviewHeader(ldata.sId, ldata),
+                    reviewHeader(ldata.sId, ldata, totalRating, numReviews),
                     Padding(
-                      padding: EdgeInsets.only(top: 85.0),
+                      padding: EdgeInsets.only(top: 105.0),
                       child: ListView.builder(
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
