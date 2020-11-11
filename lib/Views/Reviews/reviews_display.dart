@@ -36,16 +36,24 @@ class StoreReviews extends StatelessWidget {
       );
     }
 
-    // Widget to style store data such as name and address
-    Padding storeText(String text) {
-      return Padding(
-        padding: EdgeInsets.only(top: 10.0, left: 10.0),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.grey[850],
-            fontWeight: FontWeight.bold,
-          ),
+    // Widget to style store name
+    Text storeName(String text) {
+      return Text(
+        text,
+        style: TextStyle(
+          color: Colors.grey[850],
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      );
+    }
+
+    // Widget to style store address
+    Text storeText(String text) {
+      return Text(
+        text,
+        style: TextStyle(
+          color: Colors.grey[850],
         ),
       );
     }
@@ -62,40 +70,54 @@ class StoreReviews extends StatelessWidget {
             String message;
             if (snapshot.hasError) {
               message = "Something went wrong Location Info";
+              return storeText(message);
             }
 
             if (snapshot.hasData &&
                 snapshot.hasData &&
                 snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> locationData = snapshot.data.data();
-              message = locationData['name'] +
-                  '\n' +
-                  locationData['streetAddress'] +
+              String name = locationData['name'];
+              message = locationData['streetAddress'] +
                   '\n' +
                   locationData['city'] +
                   ', ' +
                   locationData['state'] +
                   ' ' +
                   locationData['zipCode'];
+              return Column(
+                //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  storeName(name),
+                  storeText(message),
+                ],
+              );
             } else {
               message = "LOADING";
+              return storeText(message);
             }
-
-            return storeText(message);
           });
     }
 
     // Widget for the header bar that contains store information and the add review button
     Widget reviewHeader(
         String locationID, StoreData storedata, int ratingSum, int numReviews) {
-      double avgRatng = ratingSum / numReviews;
+      double avgRating = 0;
+      if (numReviews > 0) {
+        avgRating = ratingSum / numReviews;
+      }
       return Container(
-        height: 100,
+        height: 105,
         width: double.infinity,
         color: Colors.grey[300],
         child: Stack(
           children: <Widget>[
-            getLocation(locationID),
+            Padding(
+              padding: EdgeInsets.only(top: 10.0, left: 10),
+              child: getLocation(locationID),
+            ),
             Padding(
               padding: EdgeInsets.only(top: 10.0, left: 275),
               child: FlatButton.icon(
@@ -114,19 +136,19 @@ class StoreReviews extends StatelessWidget {
             ),
             // In case I add average reviews feature on the header bar (TBD)
             Padding(
-              padding: EdgeInsets.only(top: 65.0, left: 10.0),
+              padding: EdgeInsets.only(top: 68.0, left: 10.0),
               child: RatingBarIndicator(
                 itemBuilder: (context, _) => Icon(
                   Icons.star,
                   color: Colors.amber,
                 ),
-                rating: avgRatng,
+                rating: avgRating,
                 itemCount: 5,
                 itemSize: 25.0,
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 70.0, left: 140),
+              padding: EdgeInsets.only(top: 73.0, left: 140),
               child: Text(
                 '($numReviews)',
                 style: TextStyle(
@@ -221,10 +243,13 @@ class StoreReviews extends StatelessWidget {
               // Get the sum of the total rating so that the average rating can be calculated
               // https://stackoverflow.com/questions/62722560/how-to-calculate-the-sum-of-a-particular-field-of-all-the-documents-in-a-collect
 
-              var ds = snapshot.data.docs;
               int totalRating = 0;
-              for (int i = 0; i < numReviews; i++) {
-                totalRating += (ds[i]['rating']);
+
+              if (numReviews > 0) {
+                var ds = snapshot.data.docs;
+                for (int i = 0; i < numReviews; i++) {
+                  totalRating += (ds[i]['rating']);
+                }
               }
 
               print('rating sum $totalRating');
@@ -234,7 +259,7 @@ class StoreReviews extends StatelessWidget {
                   children: <Widget>[
                     reviewHeader(ldata.sId, ldata, totalRating, numReviews),
                     Padding(
-                      padding: EdgeInsets.only(top: 105.0),
+                      padding: EdgeInsets.only(top: 110.0),
                       child: ListView.builder(
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
