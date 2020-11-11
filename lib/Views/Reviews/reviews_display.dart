@@ -6,19 +6,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Views/Common/base_app.dart';
 import 'package:shopping_app/Views/Reviews/add_review.dart';
+import 'package:shopping_app/Views/Reviews/edit_review.dart';
+import 'package:shopping_app/Models/review.dart';
 
 // https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
 // https://flutterawesome.com/a-simple-ratingbar-for-flutter-which-also-include-a-rating-bar-indicator/
 
 class StoreReviews extends StatelessWidget {
   final FirebaseAuth auth = FirebaseAuth.instance;
+
   final StoreData ldata;
   StoreReviews({this.ldata});
   static const String appBarTitle = 'Store Reviews';
 
   @override
   Widget build(BuildContext context) {
-    // Text Widget for to Bold username
+    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
+    String myCurrentUserId = auth.currentUser.uid;
+    print('current user: $myCurrentUserId');
+    // Text Widget to Bold username
     Text reviewInfoText(String text) {
       return Text(
         text,
@@ -165,16 +171,15 @@ class StoreReviews extends StatelessWidget {
                 snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> userData = snapshot.data.data();
 
+              // Calculate User's rank and retrieve icon
               int userPoints = userData['rankPoints'];
-              String userRank = db.getUserRank(userPoints);
               Icon icon = db.getRankIcon(userPoints);
               String user = userData['username'] + ' ';
-              //String rank = ' (' + userRank + ')';
+
               return Row(
                 children: <Widget>[
                   reviewInfoText(user),
                   icon,
-                  //reviewInfoText(rank)
                 ],
               );
             } else {
@@ -185,9 +190,7 @@ class StoreReviews extends StatelessWidget {
     }
 
     return Scaffold(
-        // Stream builder to review the user's preferred store location ID, so that
-        // the reviews for that store can be retrieved
-
+        // Home icon to allow users to easily navigate back to the home page
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.black),
           title: Text(
@@ -211,6 +214,7 @@ class StoreReviews extends StatelessWidget {
         ),
         body:
             // Stream builder to listen to latest user reviews that have been added
+            // for the selected store
             StreamBuilder<QuerySnapshot>(
           stream: DatabaseService().getStoreReviewsStream(ldata.sId),
           builder:
@@ -235,16 +239,46 @@ class StoreReviews extends StatelessWidget {
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot revdata = snapshot.data.docs[index];
-                          print(revdata);
+                          Map<String, dynamic> reviewMap = revdata.data();
+
+                          // Boolean variables for edit/delete button and edit date
+                          bool editDeleteBut = false;
+                          bool isEdited = false;
 
                           // Variables for user rating and formatted date stamp for review
                           int rating = revdata['rating'];
+                          String revUserId = revdata['user_id'];
                           Timestamp timestamp = revdata['date_created'];
                           DateTime myDateTime =
                               DateTime.parse(timestamp.toDate().toString());
                           String formattedDateTime =
                               DateFormat('MM-dd-yyyy').format(myDateTime);
-                          //int userPoints = revdata['rankPoints'];
+
+                          // Variables for formatted date for edited date
+                          String formattedDateTimeEdit;
+
+                          if (reviewMap['date_edited'] != null) {
+                            isEdited = true;
+                            Timestamp timestampedit = revdata['date_created'];
+                            DateTime myDateTimeEdit = DateTime.parse(
+                                timestampedit.toDate().toString());
+                            formattedDateTimeEdit =
+                                DateFormat('MM-dd-yyyy').format(myDateTimeEdit);
+                          }
+
+                          // Review object instance to hold data for when user
+                          // wants to edit data
+                          Review reviewData = Review(
+                              id: revdata.id,
+                              userId: revdata['user_id'],
+                              rating: rating,
+                              body: revdata['body'],
+                              dateCreated: myDateTime);
+
+                          // Check if the review belongs to the logged-in user, so that edit/delete button can be added
+                          if (myCurrentUserId == revUserId) {
+                            editDeleteBut = true;
+                          }
 
                           return SizedBox(
                             child: Card(
@@ -272,6 +306,19 @@ class StoreReviews extends StatelessWidget {
                                       ],
                                     ),
                                   ),
+                                  if (isEdited)
+                                    Positioned(
+                                      bottom: 2,
+                                      right: 3,
+                                      child: Stack(
+                                        children: <Widget>[
+                                          Text('Edited: $formattedDateTimeEdit',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                              )),
+                                        ],
+                                      ),
+                                    ),
                                   Padding(
                                     padding:
                                         EdgeInsets.only(left: 65.0, top: 27.0),
@@ -289,6 +336,47 @@ class StoreReviews extends StatelessWidget {
                                     padding:
                                         EdgeInsets.only(left: 10.0, top: 70.0),
                                     child: Text('${revdata['body']}\n'),
+                                  ),
+                                  Positioned(
+                                    left: 315,
+                                    top: 20,
+                                    child: Row(
+                                      children: <Widget>[
+                                        if (editDeleteBut)
+                                          IconButton(
+                                              icon: Icon(Icons.edit),
+                                              iconSize: 25,
+                                              color: Colors.grey,
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditReview(
+                                                            sId: ldata.sId,
+                                                            rdata: reviewData),
+                                                  ),
+                                                );
+                                              }),
+                                        if (editDeleteBut)
+                                          IconButton(
+                                            icon: Icon(Icons.delete),
+                                            iconSize: 25,
+                                            color: Colors.grey,
+                                            onPressed: () {
+                                              // Delete Review from delete button
+                                              db.deleteReview(
+                                                  ldata.sId, revdata.id);
+
+                                              Scaffold.of(context)
+                                                  .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Review has been Deleted.'),
+                                              ));
+                                            },
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),

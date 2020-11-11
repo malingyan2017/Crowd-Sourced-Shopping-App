@@ -7,6 +7,9 @@ import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Reviews/reviews_display.dart';
 
+// Logic obtained from "edit_location.dart" file written by Rene Arana
+// https://api.flutter.dev/flutter/material/DropdownButton-class.html
+
 class Reviews extends StatelessWidget {
   static const String routeName = '/editLocation';
   static const String appBarTitle = 'Edit Location';
@@ -44,8 +47,6 @@ class Reviews extends StatelessWidget {
   }
 }
 
-// Logic from "edit_location" written by Rene Arana
-// https://api.flutter.dev/flutter/material/DropdownButton-class.html
 class _StoreDropDown extends StatefulWidget {
   final List<Store> storeList;
   final Store preferredStore;
@@ -69,7 +70,7 @@ class _StoreDropDownState extends State<_StoreDropDown> {
   bool locationSaved = false;
   bool errorOccurred = false;
 
-  static String saveSuccessMessage = 'Your location has been saved.';
+  static String saveSuccessMessage = 'Your location has been selected';
   static String errorMessage = 'There was an error saving your location.';
 
   @override
@@ -83,7 +84,6 @@ class _StoreDropDownState extends State<_StoreDropDown> {
     storeAddressValue = widget.preferredStore?.nameWithStreetAddress ??
         matchingStores[0].nameWithStreetAddress;
 
-    // TODO: implement initState
     super.initState();
   }
 
@@ -150,8 +150,7 @@ class _StoreDropDownState extends State<_StoreDropDown> {
                     getMatchingStore(storeAddressValue, generalAddressValue);
                 print(newStore.id);
 
-                var ldata =
-                    StoreData(sId: newStore.id, uid: auth.currentUser.uid);
+                var ldata = StoreData(sId: newStore.id);
 
                 if (newStore == null) {
                   errorOccurred = true;
@@ -166,13 +165,6 @@ class _StoreDropDownState extends State<_StoreDropDown> {
                 setState(() {});
               },
               child: Text('Go')),
-          /*IconButton(
-            icon: Icon(Icons.help),
-            iconSize: 25,
-            color: Colors.black54,
-            tooltip: 'Test',
-            onPressed: () {tooltip: 'Test',  },
-          ),*/
           Tooltip(
             message:
                 'Select a store location in order to display all the reviews and add a review for the selected store.',
@@ -182,9 +174,7 @@ class _StoreDropDownState extends State<_StoreDropDown> {
               icon: Icon(Icons.help),
               iconSize: 25,
               color: Colors.black54,
-              onPressed: () {
-                /* your code */
-              },
+              onPressed: () {},
             ),
           ),
         ],

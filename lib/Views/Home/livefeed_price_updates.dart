@@ -41,7 +41,7 @@ class LivePriceUpdates extends StatelessWidget {
         .orderBy('dateUpdated', descending: true)
         .limit(10);
 
-    // Widget to retrieve location info such as store name, city and zip code
+    // Widget to retrieve location info such as store name, city state, and zip code
     Widget getLocation(String locationID) {
       var userData =
           FirebaseFirestore.instance.collection('stores').doc(locationID).get();
@@ -90,11 +90,12 @@ class LivePriceUpdates extends StatelessWidget {
             if (snapshot.hasData &&
                 snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> userData = snapshot.data.data();
+
+              // Calculate User's rank and retrieve icon
               int userPoints = userData['rankPoints'];
-              String userRank = db.getUserRank(userPoints);
               Icon icon = db.getRankIcon(userPoints);
               String user = 'Updated by: ' + userData['username'] + ' ';
-              //String rank = ' (' + userRank + ')';
+
               return Row(
                 children: <Widget>[
                   Text(user), icon, //Text(rank)
@@ -177,6 +178,7 @@ class LivePriceUpdates extends StatelessWidget {
                           top: 46,
                           child: Checkbox(
                             checkColor: Colors.black,
+                            onChanged: null,
                             value: onSale,
                           ),
                         ),

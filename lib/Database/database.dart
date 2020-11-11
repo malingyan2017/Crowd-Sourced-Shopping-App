@@ -9,8 +9,8 @@ import 'package:shopping_app/Models/store_item.dart';
 // Class to store information to be used across various pages/widgets in the Reviews features
 class StoreData {
   String sId;
-  String uid;
-  StoreData({this.sId, this.uid});
+
+  StoreData({this.sId});
 }
 
 class DatabaseService {
@@ -308,6 +308,32 @@ class DatabaseService {
     });
 
     // TO DO: Provide points to the user for providing a rating.
+  }
+
+  // This will edit and update a store review
+  Future<void> updateStoreReview(String storeId, Review review) {
+    return storeCollection
+        .doc(storeId)
+        .collection('reviews')
+        .doc(review.id)
+        .update({
+          'rating': review.rating,
+          'date_edited': DateTime.now(),
+          'body': review.body
+        })
+        .then((value) => print("Review Updated"))
+        .catchError((error) => print("Failed to update review: $error"));
+  }
+
+  // Deletes a review from the database for a given store and review
+  Future<void> deleteReview(String storeId, String reviewId) {
+    return storeCollection
+        .doc(storeId)
+        .collection('reviews')
+        .doc(reviewId)
+        .delete()
+        .then((value) => print("Review Deleted"))
+        .catchError((error) => print("Failed to delete review: $error"));
   }
 
   // Returns the most recent reviews written throughout the database

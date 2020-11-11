@@ -85,16 +85,15 @@ class LiveReviews extends StatelessWidget {
                 snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> userData = snapshot.data.data();
 
+              // Calculate User's rank and retrieve icon
               int userPoints = userData['rankPoints'];
-              String userRank = db.getUserRank(userPoints);
               Icon icon = db.getRankIcon(userPoints);
               String user = userData['username'] + ' ';
-              //String rank = ' (' + userRank + ')';
+
               return Row(
                 children: <Widget>[
                   reviewInfoText(user),
                   icon,
-                  //reviewInfoText(rank)
                 ],
               );
             } else {
@@ -167,7 +166,6 @@ class LiveReviews extends StatelessWidget {
                             rating: rating.toDouble(),
                             itemCount: 5,
                             itemSize: 17.0,
-                            // emptyColor: Colors.amber.withAlpha(90),
                           ),
                         ),
                         Padding(

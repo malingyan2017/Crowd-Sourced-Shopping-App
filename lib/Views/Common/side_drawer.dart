@@ -44,12 +44,6 @@ class SideDrawer extends StatelessWidget {
                 .getUserRank(userPoints);
             Icon icon = db.getRankIcon(userPoints);
 
-            /* Row(
-                children: <Widget>[
-                  Text('Username: ${data['username']} '), icon, ),
-                ],
-              );*/
-
             if (data['preferredLocation'] != null) {
               preferredStore = Store.storeFromMap(data['preferredLocation']);
             }
@@ -71,7 +65,7 @@ class SideDrawer extends StatelessWidget {
                   child: Container(
                     child: Row(
                       children: <Widget>[
-                        Text('Username: ${data['username']} '),
+                        userInfoText('Username: ${data['username']} '),
                         icon,
                       ],
                     ),

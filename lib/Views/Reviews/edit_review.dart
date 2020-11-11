@@ -11,11 +11,13 @@ import "dart:async";
 // https://stackoverflow.com/questions/49351648/how-do-i-disable-a-button-in-flutter
 // https://medium.com/flutter-community/simple-ways-to-pass-to-and-share-data-with-widgets-pages-f8988534bd5b
 
-class AddReview extends StatelessWidget {
-  final StoreData data;
-  AddReview({this.data});
+class EditReview extends StatelessWidget {
+  final Review rdata;
 
-  static const String appBarTitle = 'Add Review';
+  final String sId;
+  EditReview({this.sId, this.rdata});
+
+  static const String appBarTitle = 'Edit Review';
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class AddReview extends StatelessWidget {
       ),
       body: Stack(
         children: <Widget>[
-          MyCustomForm(data: data),
+          MyCustomForm(sId: sId, rdata: rdata),
         ],
       ),
     );
@@ -52,49 +54,52 @@ class AddReview extends StatelessWidget {
 
 // Create a Form widget for the Review Page.
 class MyCustomForm extends StatefulWidget {
-  final StoreData data;
-  MyCustomForm({this.data});
+  final Review rdata;
+
+  final String sId;
+  MyCustomForm({this.sId, this.rdata});
 
   @override
   MyCustomFormState createState() {
-    return MyCustomFormState(data: data);
+    return MyCustomFormState(sId: sId, rdata: rdata);
   }
 }
 
 // Create a corresponding State class.
 // This class holds data related to the form.
 class MyCustomFormState extends State<MyCustomForm> {
-  final StoreData data;
-  MyCustomFormState({this.data});
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final Review rdata;
 
+  final String sId;
+  MyCustomFormState({this.sId, this.rdata});
   final _formKey = GlobalKey<FormState>();
 
-  int _myRating = 0;
+  int _myRating;
   String revBody;
-  bool _buttonEnabled = false;
 
   // Function to validate the form data after hitting submit
   void validateForm() {
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
-    String myCurrentUserId = auth.currentUser.uid;
-    print('add rev user: $myCurrentUserId');
     if (_formKey.currentState.validate()) {
+      // Check if the rating value has changed
+      int ratingVal;
+      if (_myRating == null) {
+        ratingVal = rdata.rating;
+      } else {
+        ratingVal = _myRating;
+      }
       Review reviewData = Review(
-          userId: myCurrentUserId,
-          rating: _myRating,
-          body: revBody,
-          dateCreated: DateTime.now());
-
+        id: rdata.id,
+        userId: rdata.userId,
+        rating: ratingVal,
+        body: revBody,
+      );
       // If data is valid, add data into database
-      db.addStoreReview(data.sId, reviewData);
+      db.updateStoreReview(sId, reviewData);
 
-      // Update Rank points by 1 for every new review
-      db.updateRankPoints(1, reviewData.userId);
-
-      // Confimration message for review addition 
       Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text('A Review has been Added.'),
+        content: Text('A Review has been Updated.'),
       ));
       // https://stackoverflow.com/questions/49072957/flutter-dart-open-a-view-after-a-delay
       Timer(Duration(seconds: 2), () {
@@ -117,7 +122,7 @@ class MyCustomFormState extends State<MyCustomForm> {
               alignment: Alignment.topCenter,
               // Widget for the rating bar
               child: RatingBar(
-                initialRating: 0,
+                initialRating: rdata.rating.toDouble(),
                 minRating: 1,
                 unratedColor: Colors.amber[100],
                 direction: Axis.horizontal,
@@ -131,8 +136,6 @@ class MyCustomFormState extends State<MyCustomForm> {
                 onRatingUpdate: (rating) {
                   setState(() {
                     _myRating = rating.toInt();
-                    _buttonEnabled = true;
-                    print(_myRating);
                   });
                 },
               ),
@@ -143,8 +146,8 @@ class MyCustomFormState extends State<MyCustomForm> {
             maxLines: 5,
             autocorrect: true,
             maxLength: 255,
+            initialValue: rdata.body,
             decoration: InputDecoration(
-              hintText: 'Enter a review . . .',
               border: OutlineInputBorder(),
               helperText: 'Tell us about your experience at this store.',
             ),
@@ -163,9 +166,10 @@ class MyCustomFormState extends State<MyCustomForm> {
             padding:
                 const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
             child: RaisedButton(
-              color: _buttonEnabled ? Colors.blue[200] : Colors.grey,
-              onPressed: _buttonEnabled ? () => validateForm() : null,
-              child: Text('Submit'),
+              color: Colors.blue[200],
+              onPressed: () => validateForm(),
+              //onPressed: () => null,
+              child: Text('Update'),
             ),
           ),
         ],
