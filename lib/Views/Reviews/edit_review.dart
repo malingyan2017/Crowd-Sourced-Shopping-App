@@ -94,6 +94,7 @@ class MyCustomFormState extends State<MyCustomForm> {
         userId: rdata.userId,
         rating: ratingVal,
         body: revBody,
+        dateEdited: DateTime.now(),
       );
       // If data is valid, add data into database
       db.updateStoreReview(sId, reviewData);

@@ -318,7 +318,7 @@ class DatabaseService {
         .doc(review.id)
         .update({
           'rating': review.rating,
-          'date_edited': DateTime.now(),
+          'date_edited': review.dateEdited,
           'body': review.body
         })
         .then((value) => print("Review Updated"))
