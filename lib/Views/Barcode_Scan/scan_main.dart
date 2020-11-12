@@ -53,7 +53,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
             child: Column(
               children: [
                 Icon(
-                  Icons.qr_code,
+                  Icons.camera_alt,
                   size: 60,
                 ),
                 Text('Scan Item'),
