@@ -33,6 +33,7 @@ class _SearchState extends State<Search> {
         Container(
           child: TextField(
             decoration: InputDecoration(
+              border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.search),
               hintText: 'enter your search',
             ),
@@ -50,6 +51,15 @@ class _SearchState extends State<Search> {
                   ? specificItems.snapshots()
                   : items.limit(10).snapshots(),
               builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Text('Loading');
+                }
+                if (snapshot.data.docs.isEmpty) {
+                  return Text('no item found for this name');
+                }
+                if (snapshot.hasError) {
+                  return Text('Something went wrong');
+                }
                 return (snapshot.connectionState == ConnectionState.waiting)
                     ? Center(child: CircularProgressIndicator())
                     : ListView.builder(
@@ -75,7 +85,13 @@ class _SearchState extends State<Search> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('name: ${data['name']}'),
+                                  Text(
+                                    '${data['name']}',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   MyDropDownButton(
                                     data: data,
                                     docId: docId,
