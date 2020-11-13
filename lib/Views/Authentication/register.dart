@@ -37,61 +37,73 @@ class _RegisterState extends State<Register> {
           )
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(children: <Widget>[
-          SizedBox(
-            height: 30,
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage('https://uago.at/-o0SC/sgim.jpg'),
+            fit: BoxFit.cover,
           ),
-          TextFormField(
-            decoration: InputDecoration(
-              hintText: 'E-mail',
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(children: <Widget>[
+            SizedBox(
+              height: 30,
             ),
-            validator: (value) =>
-                value.isEmpty ? 'Please enter an email' : null,
-            onChanged: (val) {
-              setState(() {
-                email = val;
-              });
-            },
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          TextFormField(
-            decoration: InputDecoration(
-              hintText: 'Password(at least 6 characters)',
+            TextFormField(
+              decoration: InputDecoration(
+                hintText: 'E-mail',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) =>
+                  value.isEmpty ? 'Please enter an email' : null,
+              onChanged: (val) {
+                setState(() {
+                  email = val;
+                });
+              },
             ),
-            validator: (value) =>
-                value.length < 6 ? 'enter at lease 6 characters' : null,
-            obscureText: true,
-            onChanged: (val) {
-              setState(() {
-                password = val;
-              });
-            },
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          RaisedButton(
-            child: Text('Register'),
-            onPressed: () async {
-              if (_formKey.currentState.validate()) {
-                dynamic result =
-                    await _auth.registerWithEmailPassword(email, password);
-                if (result == null) {
-                  setState(() {
-                    error = 'register failed';
-                  });
+            SizedBox(
+              height: 30,
+            ),
+            TextFormField(
+              decoration: InputDecoration(
+                hintText: 'Password(at least 6 characters)',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) =>
+                  value.length < 6 ? 'enter at lease 6 characters' : null,
+              obscureText: true,
+              onChanged: (val) {
+                setState(() {
+                  password = val;
+                });
+              },
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            RaisedButton(
+              child: Text('Register'),
+              color: Colors.blue[200],
+              textColor: Colors.black,
+              onPressed: () async {
+                if (_formKey.currentState.validate()) {
+                  dynamic result =
+                      await _auth.registerWithEmailPassword(email, password);
+                  if (result == null) {
+                    setState(() {
+                      error = 'register failed';
+                    });
+                  }
                 }
-              }
-            },
-          ),
-          SizedBox(
-            child: Text(error),
-          )
-        ]),
+              },
+            ),
+            SizedBox(
+              child: Text(error),
+            )
+          ]),
+        ),
       ),
     );
   }
