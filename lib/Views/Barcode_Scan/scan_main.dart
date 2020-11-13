@@ -56,7 +56,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
                   Icons.camera_alt,
                   size: 60,
                 ),
-                Text('Scan Item'),
+                Text('Scan to Update Item'),
               ],
             ),
           ),

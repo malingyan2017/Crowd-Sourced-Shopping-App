@@ -24,9 +24,27 @@ class _TagsFormState extends State<TagsForm> {
     return Form(
       key: _formKey,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Update Tags',
+              style:
+                  TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
           TextFormField(
-            decoration: InputDecoration(hintText: 'enter tag'),
+            decoration: InputDecoration(
+              hintText: 'Enter new tag',
+              border: OutlineInputBorder(),
+            ),
             validator: (val) {
               if (widget.tags.contains(val)) {
                 return 'tag already exists';
@@ -39,16 +57,20 @@ class _TagsFormState extends State<TagsForm> {
             onChanged: (val) => setState(() => _tag = val),
           ),
           SizedBox(height: 20),
-          RaisedButton(
-              child: Text('add tag'),
-              onPressed: () async {
-                if (_formKey.currentState.validate()) {
-                  await DatabaseService().addTag(_tag, widget.itemId);
-                }
-                await DatabaseService(uid: user.uid)
-                    .updateRankPoints(1, user.uid);
-                Navigator.pop(context);
-              }),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(
+                color: Colors.blue[200],
+                child: Text('Add Tag'),
+                onPressed: () async {
+                  if (_formKey.currentState.validate()) {
+                    await DatabaseService().addTag(_tag, widget.itemId);
+                  }
+                  await DatabaseService(uid: user.uid)
+                      .updateRankPoints(1, user.uid);
+                  Navigator.pop(context);
+                }),
+          ),
         ],
       ),
     );

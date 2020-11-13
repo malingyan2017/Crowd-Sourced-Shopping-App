@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shopping_app/Views/Barcode_Scan/empty_scan.dart';
 
 import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
@@ -31,7 +32,7 @@ class _ScanResultState extends State<ScanResult> {
   }
 
   //function for add tag button, return a bottom sheet
-  void _showTagsForm(String itemId, dynamic tags) {
+  void _showTagsForm(String itemId, dynamic tags, String storeId) {
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -67,14 +68,9 @@ class _ScanResultState extends State<ScanResult> {
             String storeZipcode = data['preferredLocation.zipCode'];
 
             return widget.scan_result == ''
-                ? Column(
-                    children: [
-                      Text('no item is scanned yet'),
-                      Text(
-                          'Your location: $storeName with zipcode $storeZipcode'),
-                      Text(
-                          'To change location, please navigate to upper left icon'),
-                    ],
+                ? EmptyScan(
+                    storeName: storeName,
+                    storeZipcode: storeZipcode,
                   )
                 : StreamBuilder<QuerySnapshot>(
                     stream: DatabaseService()
@@ -128,47 +124,79 @@ class _ScanResultState extends State<ScanResult> {
                                       ),
                                       Card(
                                         child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text('Product Details:'),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  width: 70,
-                                                  height: 70,
-                                                  decoration: BoxDecoration(
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(
-                                                          data['pictureUrl']),
+                                            Text(
+                                              'Product Details:',
+                                              style: TextStyle(
+                                                  color: Colors.black87,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    width: 70,
+                                                    height: 70,
+                                                    decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            data['pictureUrl']),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                        'name: ${data['name']}'),
-                                                    Text(
-                                                        'price: ${data['price']}'),
-                                                    Text(
-                                                        'update by: $userUpdateName <$userUpdateRank>'),
-                                                    Text(
-                                                        'updated on: ${data['dateUpdated'].toDate().toString()}'),
-                                                    Text(
-                                                        'on sale: ${data['onSale']}')
-                                                  ],
-                                                ),
-                                              ],
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '${data['name']}',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black87,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      Text(
+                                                        '\$' '${data['price']}',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Colors.green[800],
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                          'update by: $userUpdateName'),
+                                                      Text(
+                                                          'updated on: ${data['dateUpdated'].toDate().toString()}'),
+                                                      Text(
+                                                          'on sale: ${data['onSale']}')
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                            RaisedButton(
-                                              child: Text('Update Price'),
-                                              onPressed: () => _showUpdateForm(
-                                                  storeId, itemId),
+                                            SizedBox(
+                                              width: 120,
+                                              child: RaisedButton(
+                                                color: Colors.blue[200],
+                                                child: Text('Update Price'),
+                                                onPressed: () =>
+                                                    _showUpdateForm(
+                                                        storeId, itemId),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -193,27 +221,39 @@ class _ScanResultState extends State<ScanResult> {
                                             var itemId = data.id;
                                             return Card(
                                               child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  Text('Item tags:'),
+                                                  Text(
+                                                    'Item tags:',
+                                                    style: TextStyle(
+                                                        color: Colors.black87,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
                                                   Row(
                                                     mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
+                                                        MainAxisAlignment.start,
                                                     children: [
                                                       for (var item in tags)
                                                         Padding(
                                                           padding:
                                                               const EdgeInsets
-                                                                  .all(8.0),
+                                                                      .fromLTRB(
+                                                                  0, 8, 8, 8),
                                                           child: Text(item),
                                                         ),
                                                     ],
                                                   ),
-                                                  RaisedButton(
-                                                    child: Text('Add Tags'),
-                                                    onPressed: () =>
-                                                        _showTagsForm(
-                                                            itemId, tags),
+                                                  SizedBox(
+                                                    width: 120,
+                                                    child: RaisedButton(
+                                                      color: Colors.blue[200],
+                                                      child: Text('Add Tags'),
+                                                      onPressed: () =>
+                                                          _showTagsForm(itemId,
+                                                              tags, storeId),
+                                                    ),
                                                   ),
                                                 ],
                                               ),
