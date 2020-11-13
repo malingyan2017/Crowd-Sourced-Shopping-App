@@ -7,7 +7,7 @@ import 'package:shopping_app/Views/Barcode_Scan/scan_main.dart';
 import 'package:shopping_app/Views/Search/search_main.dart';
 import 'package:shopping_app/Views/Common/side_drawer.dart';
 import 'package:shopping_app/Views/Common/app_bar.dart';
-import 'package:shopping_app/Views/Shopping_List/shopping_list.dart';
+import 'package:shopping_app/Views/Shopping_List/shopping_list_view.dart';
 
 // Sources: https://www.youtube.com/watch?v=WG4y47qGPX4&t=5s
 // https://api.flutter.dev/flutter/material/BottomNavigationBar-class.html

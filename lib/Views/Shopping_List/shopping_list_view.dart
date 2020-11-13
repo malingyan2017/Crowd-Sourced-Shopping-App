@@ -10,12 +10,12 @@ import 'package:shopping_app/Views/Compare/compare.dart';
 
 // Most of the structure for the ui was adapted from Lingyan's work in 
 // the item search page.
-class ShoppingList extends StatefulWidget {
+class ShoppingListView extends StatefulWidget {
   @override
-  _ShoppingListState createState() => _ShoppingListState();
+  _ShoppingListViewState createState() => _ShoppingListViewState();
 }
 
-class _ShoppingListState extends State<ShoppingList> {
+class _ShoppingListViewState extends State<ShoppingListView> {
 
   // static const String title = 'Shopping List';
   int itemCount = 0;
@@ -27,7 +27,7 @@ class _ShoppingListState extends State<ShoppingList> {
     DatabaseService db = DatabaseService(uid: user.uid);
 
     return StreamBuilder<QuerySnapshot>(
-      stream: db.getShoppingList(),
+      stream: db.getShoppingListStream(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
 
         Widget bodyToReturn;

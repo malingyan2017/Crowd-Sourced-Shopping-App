@@ -1,4 +1,4 @@
-import 'package:shopping_app/Models/item.dart';
+import 'package:shopping_app/Models/list_item.dart';
 
 class ShoppingList {
 
@@ -16,5 +16,16 @@ class ShoppingList {
     items.removeWhere(
       (element) => element.itemId == id
     );
+  }
+
+  List<String> barcodeList() {
+
+    List<String> barcodes = [];
+
+    items.forEach((element) {
+      barcodes.add(element.barcode);
+    });
+
+    return barcodes;
   }
 }
