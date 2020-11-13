@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shopping_app/Views/Shopping_List/shopping_list.dart';
+import 'package:shopping_app/Views/Shopping_List/shopping_list_view.dart';
 
 class MyAppBar extends StatelessWidget with PreferredSizeWidget {
   @override
@@ -30,7 +30,7 @@ class MyAppBar extends StatelessWidget with PreferredSizeWidget {
           iconSize: 32,
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(
-              builder: (context) => ShoppingList()
+              builder: (context) => ShoppingListView()
               )
             );
           },

@@ -32,63 +32,57 @@ class SideDrawer extends StatelessWidget {
     }
 
     Widget userStream = StreamBuilder(
-        stream: db.getUserStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text("Something went wrong");
-          } else if (snapshot.hasData) {
-            Map<String, dynamic> data = snapshot.data.data();
-            Store preferredStore;
-            int userPoints = data['rankPoints'];
-            String userRank = DatabaseService(uid: auth.currentUser.uid)
-                .getUserRank(userPoints);
-            Icon icon = db.getRankIcon(userPoints);
+      stream: db.getUserStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text("Something went wrong");
+        } else if (snapshot.hasData) {
+          Map<String, dynamic> data = snapshot.data.data();
+          Store preferredStore;
+          int userPoints = data['rankPoints'];
+          String userRank = DatabaseService(uid: auth.currentUser.uid)
+              .getUserRank(userPoints);
 
-            if (data['preferredLocation'] != null) {
-              preferredStore = Store.storeFromMap(data['preferredLocation']);
-            }
-
-            // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  child: Container(
-                    child: Icon(
-                      Icons.account_circle,
-                      color: Colors.black,
-                      size: 50,
-                    ),
-                  ),
-                ),
-                Flexible(
-                  child: Container(
-                    child: Row(
-                      children: <Widget>[
-                        userInfoText('Username: ${data['username']} '),
-                        icon,
-                      ],
-                    ),
-                  ),
-                ),
-                Flexible(
-                  child: Container(
-                    child: userInfoText('Rank : $userRank'),
-                  ),
-                ),
-                //child: userInfoText('Rank: ${data['rank']}'))),
-                Flexible(
-                    flex: 2,
-                    child: Container(
-                        child: preferredStore == null
-                            ? userInfoText('Store: $noPreferredStore')
-                            : userInfoText(
-                                'Store: ${preferredStore.fullAddress}')))
-              ],
-            );
+          if (data['preferredLocation'] != null) {
+            preferredStore = Store.storeFromMap(data['preferredLocation']);
           }
-          return Text("loading");
-        });
+
+          // https://stackoverflow.com/questions/56326005/how-to-use-expanded-in-singlechildscrollview
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Container(
+                  child: Icon(
+                    Icons.account_circle,
+                    color: Colors.black,
+                    size: 50,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Container(
+                  child: userInfoText('Username: ${data['username']}'))),
+              Flexible(
+                child: Container(
+                  child: userInfoText('Rank : $userRank'),
+                ),
+              ),
+              //child: userInfoText('Rank: ${data['rank']}'))),
+              Flexible(
+                flex: 2,
+                child: Container(
+                  child: preferredStore == null
+                    ? userInfoText('Store: $noPreferredStore')
+                    : userInfoText(
+                        'Store: ${preferredStore.fullAddress}')
+                )
+              )
+            ],
+          );
+        }
+        return Text("loading");
+      });
 
     return new Drawer(
       child: ListView(
