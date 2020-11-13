@@ -48,6 +48,15 @@ class _SearchState extends State<Search> {
                   ? specificItems.snapshots()
                   : items.limit(10).snapshots(),
               builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Text('Loading');
+                }
+                if (snapshot.data.docs.isEmpty) {
+                  return Text('no item found for this name');
+                }
+                if (snapshot.hasError) {
+                  return Text('Something went wrong');
+                }
                 return (snapshot.connectionState == ConnectionState.waiting)
                     ? Center(child: CircularProgressIndicator())
                     : ListView.builder(

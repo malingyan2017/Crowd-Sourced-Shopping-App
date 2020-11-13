@@ -41,6 +41,7 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
         RaisedButton(
             color: Colors.blue[200],
             child: Text('add to cart'),
+            textColor: Colors.black,
             onPressed: () async {
               await DatabaseService(uid: user.uid).addToCart(
                 widget.docId,

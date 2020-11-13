@@ -111,18 +111,39 @@ class DatabaseService {
   //add to cart function by lingyan
   Future addToCart(String itemId, String name, String image, int quantity,
       String barcode) async {
-    return await FirebaseFirestore.instance
+    QuerySnapshot result = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection('shoppingList')
-        .doc()
-        .set({
-      'name': name,
-      'image': image,
-      'itemId': itemId,
-      'quantity': quantity,
-      'barcode': barcode,
-    });
+        .where('barcode', isEqualTo: barcode)
+        .limit(1)
+        .get();
+
+    if (result.size == 0) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('shoppingList')
+          .doc()
+          .set({
+        'name': name,
+        'image': image,
+        'itemId': itemId,
+        'quantity': quantity,
+        'barcode': barcode,
+      });
+    } else {
+      var doc = result.docs[0];
+      String id = doc.id;
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('shoppingList')
+          .doc(id)
+          .update({
+        'quantity': FieldValue.increment(quantity),
+      });
+    }
   }
 
   //gte store info by lingyan
