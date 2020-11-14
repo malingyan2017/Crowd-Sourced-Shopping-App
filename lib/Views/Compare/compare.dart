@@ -195,9 +195,9 @@ class __StoreTileState extends State<_StoreTile> {
     List<Widget> storeItems = getStoreItems();
 
     return ExpansionTile(
-      title: Text(widget.store.name),
-      subtitle: Text(widget.store.streetAddress),
-      trailing: Text('Total Price $total'),
+      title: Text('${widget.store.name} - ${widget.store.streetAddress}'),
+      subtitle: Text('Total Price $total'),
+      //trailing: Text('Total Price $total'),
       children: storeItems,
     );
   }
