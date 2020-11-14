@@ -53,7 +53,7 @@ class _ScanResultState extends State<ScanResult> {
     return Flexible(
       //get current user stream to get prefered store info
       child: StreamBuilder<DocumentSnapshot>(
-          stream: DatabaseService(uid: user.uid).getUserStream(),
+          stream: DatabaseService(uid: user.uid).getCurrentUserStream(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Text('Something went wrong');
@@ -101,7 +101,7 @@ class _ScanResultState extends State<ScanResult> {
 
                             return StreamBuilder<DocumentSnapshot>(
                                 stream: DatabaseService(uid: userUpdateId)
-                                    .getUserStream(),
+                                    .getCurrentUserStream(),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasError) {
                                     return Text('Something went wrong');

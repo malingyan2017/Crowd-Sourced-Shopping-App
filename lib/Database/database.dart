@@ -194,7 +194,7 @@ class DatabaseService {
     return null;
   }
 
-  Future<DocumentSnapshot> getUserSnapshot() {
+  Future<DocumentSnapshot> getCurrentUserSnapshot() {
     return userCollection.doc(uid).get();
   }
 
@@ -202,8 +202,13 @@ class DatabaseService {
     return itemCollection.snapshots();
   }
 
-  Stream<DocumentSnapshot> getUserStream() {
+  Stream<DocumentSnapshot> getCurrentUserStream() {
     return userCollection.doc(uid).snapshots();
+  }
+
+  Stream<DocumentSnapshot> getUserStream(String userId) {
+
+    return userCollection.doc(userId).snapshots();
   }
 
   Stream<DocumentSnapshot> getStoreStream(String storeId) {
@@ -449,6 +454,7 @@ class DatabaseService {
   // Converts a list of queries into a list of storeItem objects.
   List<StoreItem> queryToStoreItemList(List<QueryDocumentSnapshot> queryList) {
 
+
     return queryList.map((QueryDocumentSnapshot snapshot) {
       Map<String, dynamic> storeItem = snapshot.data();
 
@@ -461,7 +467,7 @@ class DatabaseService {
         pictureUrl: storeItem['pictureUrl'],
         price: storeItem['price'],
         lastUserId: storeItem['userId'],
-        lastUpdate: storeItem['dateUpdated']
+        lastUpdate: storeItem['dateUpdated'].toDate()
       );
     }).toList();
   }
