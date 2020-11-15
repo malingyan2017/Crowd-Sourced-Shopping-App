@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Database/database.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // https://stackoverflow.com/questions/54751007/cloud-functions-for-firestore-accessing-parent-collection-data
 // https://github.com/flutter/flutter/issues/15928
+// https://pub.dev/packages/cached_network_image
 
 class LivePriceUpdates extends StatelessWidget {
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -147,10 +149,12 @@ class LivePriceUpdates extends StatelessWidget {
                             Container(
                               width: 60,
                               height: 60,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(data['pictureUrl']),
-                                ),
+                              child: CachedNetworkImage(
+                                imageUrl: data['pictureUrl'],
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
                               ),
                             ),
                             Padding(
