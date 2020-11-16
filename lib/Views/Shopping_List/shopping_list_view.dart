@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Compare/compare.dart';
 
-// Most of the structure for the ui was adapted from Lingyan's work in 
+// Most of the structure for the ui was adapted from Lingyan's work in
 // the item search page.
 class ShoppingListView extends StatefulWidget {
   @override
@@ -16,41 +17,34 @@ class ShoppingListView extends StatefulWidget {
 }
 
 class _ShoppingListViewState extends State<ShoppingListView> {
-
   // static const String title = 'Shopping List';
   int itemCount = 0;
 
   @override
   Widget build(BuildContext context) {
-
     final user = Provider.of<TheUser>(context);
     DatabaseService db = DatabaseService(uid: user.uid);
 
     return StreamBuilder<QuerySnapshot>(
       stream: db.getShoppingListStream(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-
         Widget bodyToReturn;
         Widget buttonToReturn;
 
         if (snapshot.hasError) {
           bodyToReturn = Text("Something went wrong");
           // return _ScaffoldTemplate(body: Text("Something went wrong"));
-        }
-        else if (snapshot.hasData) {
+        } else if (snapshot.hasData) {
           //Map<String, dynamic> data = snapshot.data.data();
 
           itemCount = snapshot.data.docs.length;
 
-          bodyToReturn = itemCount == 0 
-            ? _EmptyCart() 
-            : _shoppingListView(itemCount, snapshot);
-          
-          buttonToReturn = itemCount == 0
-            ? null
-            : _compareButton(context);
-        }
-        else {
+          bodyToReturn = itemCount == 0
+              ? _EmptyCart()
+              : _shoppingListView(itemCount, snapshot);
+
+          buttonToReturn = itemCount == 0 ? null : _compareButton(context);
+        } else {
           bodyToReturn = CenteredLoadingCircle(
             height: Measure.screenHeightFraction(context, .2),
             width: Measure.screenWidthFraction(context, .4),
@@ -58,51 +52,47 @@ class _ShoppingListViewState extends State<ShoppingListView> {
         }
 
         return _ScaffoldTemplate(
-          body: bodyToReturn, 
+          body: bodyToReturn,
           button: buttonToReturn,
         );
       },
     );
   }
 
-  Widget _shoppingListView(int itemCount, AsyncSnapshot<QuerySnapshot> snapshot) {
-
+  Widget _shoppingListView(
+      int itemCount, AsyncSnapshot<QuerySnapshot> snapshot) {
     return ListView.builder(
       itemCount: itemCount,
       itemBuilder: (BuildContext context, int index) {
         DocumentSnapshot document = snapshot.data.docs[index];
         Map<String, dynamic> data = document.data();
         ListItem item = ListItem(
-          listItemId: document.id, 
-          itemId: data['itemId'],
-          barcode: data['barcode'],
-          name: data['name'],
-          pictureUrl: data['image'],
-          quantity: data['quantity']
-        );
+            listItemId: document.id,
+            itemId: data['itemId'],
+            barcode: data['barcode'],
+            name: data['name'],
+            pictureUrl: data['image'],
+            quantity: data['quantity']);
 
-        return _ListItemCard(item: item,);
+        return _ListItemCard(
+          item: item,
+        );
       },
     );
   }
 
   Widget _compareButton(BuildContext context) {
-
     return ElevatedButton(
       child: Text('Compare'),
       onPressed: () {
-        Navigator.push(context, 
-          MaterialPageRoute(
-            builder: (context) => Compare()
-          )
-        );
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Compare()));
       },
     );
   }
 }
 
 class _ScaffoldTemplate extends StatelessWidget {
-
   static const String title = 'Shopping List';
 
   final Widget body;
@@ -118,16 +108,16 @@ class _ScaffoldTemplate extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-          icon: Icon(Icons.home),
-          iconSize: 32,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+            icon: Icon(Icons.home),
+            iconSize: 32,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ],
       ),
       body: body,
-      persistentFooterButtons: [button], 
+      persistentFooterButtons: [button],
     );
   }
 }
@@ -144,65 +134,55 @@ class _EmptyCart extends StatelessWidget {
 }
 
 class _ListItemCard extends StatelessWidget {
-
-  static const String itemRemovalErrorMessage = 'Error removing item from cart.';
+  static const String itemRemovalErrorMessage =
+      'Error removing item from cart.';
   final ListItem item;
 
   _ListItemCard({Key key, this.item}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     final user = Provider.of<TheUser>(context);
     DatabaseService db = DatabaseService(uid: user.uid);
 
     // https://api.flutter.dev/flutter/material/ListTile-class.html
     return Card(
       child: ListTile(
-        isThreeLine: true,
-        leading: Container(
-          width: Measure.screenWidthFraction(context, .2),
-          height: Measure.screenHeightFraction(context, .2),
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              fit: BoxFit.fill,
-              image: NetworkImage(
-                item.pictureUrl
-              ),
+          isThreeLine: true,
+          leading: Container(
+            width: Measure.screenWidthFraction(context, .2),
+            height: Measure.screenHeightFraction(context, .2),
+            child: CachedNetworkImage(
+              imageUrl: item.pictureUrl,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
             ),
           ),
-        ),
-        //Image.network(widget.item.pictureUrl),
-        title: Text(
-          '${item.name}',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: _ListItemDropDownButton(
-          item: item,
-        ),   
-        trailing: RaisedButton(
-          child: Text('Remove'),
-          onPressed: () async {
-            try {
-              await db.removeShoppingListItem(item.listItemId);
-            }
-            catch (error){
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(itemRemovalErrorMessage)
-                )
-              );
-            }
-          }
-        )
-      ),
+
+          //Image.network(widget.item.pictureUrl),
+          title: Text(
+            '${item.name}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: _ListItemDropDownButton(
+            item: item,
+          ),
+          trailing: RaisedButton(
+              child: Text('Remove'),
+              onPressed: () async {
+                try {
+                  await db.removeShoppingListItem(item.listItemId);
+                } catch (error) {
+                  Scaffold.of(context).showSnackBar(
+                      SnackBar(content: Text(itemRemovalErrorMessage)));
+                }
+              })),
     );
   }
 }
 
 class _ListItemDropDownButton extends StatefulWidget {
-
   final ListItem item;
 
   _ListItemDropDownButton({Key key, this.item}) : super(key: key);
@@ -212,7 +192,6 @@ class _ListItemDropDownButton extends StatefulWidget {
 }
 
 class _ListItemDropDownButtonState extends State<_ListItemDropDownButton> {
-
   final String quantityErrorMessage = 'Error changing the quantity.';
 
   bool quantityError = false;
@@ -229,7 +208,6 @@ class _ListItemDropDownButtonState extends State<_ListItemDropDownButton> {
 
   @override
   Widget build(BuildContext context) {
-
     final user = Provider.of<TheUser>(context);
     DatabaseService db = DatabaseService(uid: user.uid);
 
@@ -243,7 +221,8 @@ class _ListItemDropDownButtonState extends State<_ListItemDropDownButton> {
           ),
           hint: Text('quantity'),
           value: quantity,
-          items: <int>[1, 2, 3, 4, 5, 6, 7].map<DropdownMenuItem<int>>((quantity) {
+          items:
+              <int>[1, 2, 3, 4, 5, 6, 7].map<DropdownMenuItem<int>>((quantity) {
             return DropdownMenuItem<int>(
               child: Text(quantity.toString()),
               value: quantity,
@@ -255,20 +234,14 @@ class _ListItemDropDownButtonState extends State<_ListItemDropDownButton> {
             if (newQuantity != quantity) {
               try {
                 await db.updateShoppingListItemQuantity(
-                  listItemId: widget.item.listItemId,
-                  quantity: newQuantity
-                );
+                    listItemId: widget.item.listItemId, quantity: newQuantity);
                 quantity = newQuantity;
-              }
-              catch (error){
+              } catch (error) {
                 Scaffold.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(quantityErrorMessage)
-                  )
-                );
+                    SnackBar(content: Text(quantityErrorMessage)));
               }
               setState(() {});
-            }  
+            }
           },
         ),
       ],
