@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_app/Database/database.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Models/the_user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Views/Search/dropDownButton.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -21,7 +19,6 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<TheUser>(context);
     //items to show when there is no searchName found
     CollectionReference items = FirebaseFirestore.instance.collection('item');
 
@@ -35,6 +32,7 @@ class _SearchState extends State<Search> {
         Container(
           child: TextField(
             decoration: InputDecoration(
+              border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.search),
               hintText: 'enter your search',
             ),
@@ -52,6 +50,15 @@ class _SearchState extends State<Search> {
                   ? specificItems.snapshots()
                   : items.limit(10).snapshots(),
               builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Text('Loading');
+                }
+                if (snapshot.data.docs.isEmpty) {
+                  return Text('no item found for this name');
+                }
+                if (snapshot.hasError) {
+                  return Text('Something went wrong');
+                }
                 return (snapshot.connectionState == ConnectionState.waiting)
                     ? Center(child: CircularProgressIndicator())
                     : ListView.builder(
@@ -79,22 +86,17 @@ class _SearchState extends State<Search> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('name: ${data['name']}'),
+                                  Text(
+                                    '${data['name']}',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   MyDropDownButton(
                                     data: data,
                                     docId: docId,
                                   ),
-                                  /*
-                                  RaisedButton(
-                                      child: Text('add to cart'),
-                                      onPressed: () async {
-                                        await DatabaseService(uid: user.uid)
-                                            .addToCart(
-                                          docId,
-                                          data['name'],
-                                          data['pictureUrl'],
-                                        );
-                                      }),*/
                                 ],
                               )
                             ],

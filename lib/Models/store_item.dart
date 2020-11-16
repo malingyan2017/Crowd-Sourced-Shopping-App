@@ -1,12 +1,13 @@
 import 'package:shopping_app/Models/item.dart';
 
-class StoreItem extends ListItem {
+class StoreItem extends Item {
 
   String storeItemId;
   double price;
   bool onSale;
   String lastUserId;
   DateTime lastUpdate;
+  int quantity;
 
   StoreItem(
     {
@@ -19,7 +20,8 @@ class StoreItem extends ListItem {
       this.price, 
       this.onSale, 
       this.lastUserId, 
-      this.lastUpdate
+      this.lastUpdate,
+      this.quantity
     }
   ) : super(itemId: itemId, barcode: barcode, name: name, pictureUrl: pictureUrl, tags: tags);
 

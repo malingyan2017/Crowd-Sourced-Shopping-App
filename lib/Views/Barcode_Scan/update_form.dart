@@ -40,9 +40,22 @@ class _UpdateFormState extends State<UpdateForm> {
           SizedBox(
             height: 20,
           ),
-          Text('update this item'),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Update Item Price',
+              style:
+                  TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
           TextFormField(
-            decoration: InputDecoration(hintText: 'enter the new price'),
+            decoration: InputDecoration(
+              hintText: 'Enter new price',
+              border: OutlineInputBorder(),
+            ),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
             ],
@@ -53,38 +66,45 @@ class _UpdateFormState extends State<UpdateForm> {
           SizedBox(
             height: 20,
           ),
-          DropdownButton<bool>(
-            hint: Text('On Sale'),
-            value: saleOrNot,
-            items: onsales.map((choice) {
-              return DropdownMenuItem(
-                  child: Text(choice.toString()), value: choice);
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                saleOrNot = value;
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownButton<bool>(
+              hint: Text('On Sale?'),
+              value: saleOrNot,
+              items: onsales.map((choice) {
+                return DropdownMenuItem(
+                    child: Text(choice.toString()), value: choice);
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  saleOrNot = value;
+                });
+              },
+            ),
           ),
           SizedBox(
             height: 20,
           ),
-          RaisedButton(
-              child: Text('update item'),
-              onPressed: () async {
-                if (_formKey.currentState.validate()) {
-                  await DatabaseService(uid: user.uid).updateItem(
-                      widget.storeId,
-                      widget.itemId,
-                      _price,
-                      saleOrNot,
-                      user.uid);
-                }
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(
+                color: Colors.blue[200],
+                child: Text('Update Price'),
+                onPressed: () async {
+                  if (_formKey.currentState.validate()) {
+                    await DatabaseService(uid: user.uid).updateItem(
+                        widget.storeId,
+                        widget.itemId,
+                        _price,
+                        saleOrNot,
+                        user.uid);
+                  }
 
-                await DatabaseService(uid: user.uid)
-                    .updateRankPoints(1, user.uid);
-                Navigator.pop(context);
-              })
+                  await DatabaseService(uid: user.uid)
+                      .updateRankPoints(1, user.uid);
+                  Navigator.pop(context);
+                }),
+          )
         ],
       ),
     );

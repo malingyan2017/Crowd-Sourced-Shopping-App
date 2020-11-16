@@ -23,7 +23,7 @@ class UpdateUser extends StatelessWidget {
         centerTitle: true,
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: db.getUserStream(),
+        stream: db.getCurrentUserStream(),
         builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
 
           if (snapshot.hasError) {

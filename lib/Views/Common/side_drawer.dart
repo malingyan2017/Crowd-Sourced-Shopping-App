@@ -32,7 +32,7 @@ class SideDrawer extends StatelessWidget {
     }
 
     Widget userStream = StreamBuilder(
-        stream: db.getUserStream(),
+        stream: db.getCurrentUserStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text("Something went wrong");
