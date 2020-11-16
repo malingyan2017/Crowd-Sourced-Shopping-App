@@ -9,6 +9,8 @@ import 'package:shopping_app/Views/Barcode_Scan/empty_scan.dart';
 import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
+import 'package:shopping_app/Models/store.dart';
+
 class ScanResult extends StatefulWidget {
   final String scan_result;
   ScanResult({this.scan_result});
@@ -32,7 +34,7 @@ class _ScanResultState extends State<ScanResult> {
   }
 
   //function for add tag button, return a bottom sheet
-  void _showTagsForm(String itemId, dynamic tags, String storeId) {
+  void _showTagsForm(String itemId, dynamic tags) {
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -62,29 +64,27 @@ class _ScanResultState extends State<ScanResult> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text("Loading");
             }
-            var data = snapshot.data;
-
-            String storeId;
-            String storeName;
-            String storeZipcode;
-            if (data['preferredLocation'] == null) {
-              storeId = 'no such store';
-              storeName = 'no such store';
-              storeZipcode = 'no store';
-            } else {
-              storeId = data['preferredLocation.id'];
-              storeName = data['preferredLocation.name'];
-              storeZipcode = data['preferredLocation.zipCode'];
+            Map<String, dynamic> data = snapshot.data.data();
+            Store preferredStore;
+            if (data['preferredLocation'] != null) {
+              preferredStore = Store.storeFromMap(data['preferredLocation']);
             }
 
+            String storeId;
+            //String storeName;
+            //String storeZipcode;
+
             return widget.scan_result == ''
-                ? EmptyScan(
-                    storeName: storeName,
-                    storeZipcode: storeZipcode,
-                  )
+                ? preferredStore == null
+                    ? Text(
+                        'No store was chosen, click  on upper left icon to set')
+                    : EmptyScan(
+                        storeName: preferredStore.name,
+                        storeZipcode: preferredStore.zipCode,
+                      )
                 : StreamBuilder<QuerySnapshot>(
-                    stream: DatabaseService()
-                        .getStoreItemStream(storeId, widget.scan_result),
+                    stream: DatabaseService().getStoreItemStream(
+                        preferredStore.id, widget.scan_result),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Text('Loading');
@@ -205,7 +205,8 @@ class _ScanResultState extends State<ScanResult> {
                                                 child: Text('Update Price'),
                                                 onPressed: () =>
                                                     _showUpdateForm(
-                                                        storeId, itemId),
+                                                        preferredStore.id,
+                                                        itemId),
                                               ),
                                             ),
                                           ],
@@ -261,8 +262,8 @@ class _ScanResultState extends State<ScanResult> {
                                                       color: Colors.blue[200],
                                                       child: Text('Add Tags'),
                                                       onPressed: () =>
-                                                          _showTagsForm(itemId,
-                                                              tags, storeId),
+                                                          _showTagsForm(
+                                                              itemId, tags),
                                                     ),
                                                   ),
                                                 ],
