@@ -63,9 +63,19 @@ class _ScanResultState extends State<ScanResult> {
               return Text("Loading");
             }
             var data = snapshot.data;
-            String storeId = data['preferredLocation.id'];
-            String storeName = data['preferredLocation.name'];
-            String storeZipcode = data['preferredLocation.zipCode'];
+
+            String storeId;
+            String storeName;
+            String storeZipcode;
+            if (data['preferredLocation'] == null) {
+              storeId = 'no such store';
+              storeName = 'no such store';
+              storeZipcode = 'no store';
+            } else {
+              storeId = data['preferredLocation.id'];
+              storeName = data['preferredLocation.name'];
+              storeZipcode = data['preferredLocation.zipCode'];
+            }
 
             return widget.scan_result == ''
                 ? EmptyScan(
