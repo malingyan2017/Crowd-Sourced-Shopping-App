@@ -284,7 +284,7 @@ class StoreReviews extends StatelessWidget {
 
                           if (reviewMap['date_edited'] != null) {
                             isEdited = true;
-                            Timestamp timestampedit = revdata['date_created'];
+                            Timestamp timestampedit = revdata['date_edited'];
                             DateTime myDateTimeEdit = DateTime.parse(
                                 timestampedit.toDate().toString());
                             formattedDateTimeEdit =

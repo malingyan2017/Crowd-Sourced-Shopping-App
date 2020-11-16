@@ -7,6 +7,7 @@ class StoreItem extends Item {
   bool onSale;
   String lastUserId;
   DateTime lastUpdate;
+  int quantity;
 
   StoreItem(
     {
@@ -19,7 +20,8 @@ class StoreItem extends Item {
       this.price, 
       this.onSale, 
       this.lastUserId, 
-      this.lastUpdate
+      this.lastUpdate,
+      this.quantity
     }
   ) : super(itemId: itemId, barcode: barcode, name: name, pictureUrl: pictureUrl, tags: tags);
 

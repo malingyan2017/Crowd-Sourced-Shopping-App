@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Views/Search/dropDownButton.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 //https://morioh.com/p/3522d01c11ef
+//https://pub.dev/packages/cached_network_image
 
 class Search extends StatefulWidget {
   @override
@@ -70,11 +72,13 @@ class _SearchState extends State<Search> {
                               Container(
                                 width: 60,
                                 height: 60,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: NetworkImage(data['pictureUrl']),
-                                  ),
-                                ),
+                               child: CachedNetworkImage(
+                                imageUrl: data['pictureUrl'],
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                              ),
                               ),
                               SizedBox(
                                 width: 20,
