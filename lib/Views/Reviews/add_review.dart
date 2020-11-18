@@ -24,11 +24,7 @@ class AddReview extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.black),
         title: Text(
           appBarTitle,
-          style: TextStyle(
-            color: Colors.black,
-          ),
         ),
-        backgroundColor: Colors.blue[200],
         centerTitle: true,
         actions: [
           IconButton(
@@ -92,7 +88,7 @@ class MyCustomFormState extends State<MyCustomForm> {
       // Update Rank points by 1 for every new review
       db.updateRankPoints(1, reviewData.userId);
 
-      // Confimration message for review addition 
+      // Confimration message for review addition
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text('A Review has been Added.'),
       ));
@@ -163,7 +159,8 @@ class MyCustomFormState extends State<MyCustomForm> {
             padding:
                 const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
             child: RaisedButton(
-              color: _buttonEnabled ? Colors.blue[200] : Colors.grey,
+              color:
+                  _buttonEnabled ? Theme.of(context).buttonColor : Colors.grey,
               onPressed: _buttonEnabled ? () => validateForm() : null,
               child: Text('Submit'),
             ),

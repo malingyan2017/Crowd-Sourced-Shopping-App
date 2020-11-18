@@ -52,7 +52,8 @@ class _BaseAppState extends State<BaseApp> {
       //resizeToAvoidBottomPadding: true,
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-            canvasColor: Colors.blue[200],
+            // canvasColor: Theme.of(context).primaryColor,
+            canvasColor: Colors.grey[350],
             textTheme: Theme.of(context)
                 .textTheme
                 .copyWith(caption: TextStyle(color: Colors.black54))),
@@ -61,47 +62,30 @@ class _BaseAppState extends State<BaseApp> {
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.home,
-                color: Colors.black,
-                size: 32,
               ),
               label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.search,
-                color: Colors.black,
-                size: 32,
               ),
               label: 'Search',
             ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.qr_code,
-                color: Colors.black,
-                size: 32,
               ),
               label: 'Scan',
             ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.comment,
-                color: Colors.black,
-                size: 32,
               ),
               label: 'Reviews',
             ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(
-            //     Icons.shopping_cart,
-            //     color: Colors.black,
-            //     size: 32,
-            //   ),
-            //   label: 'Shopping List',
-            // ),
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTap,
-          selectedItemColor: Colors.black,
         ),
       ),
     );

@@ -39,8 +39,8 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
           }).toList(),
         ),
         RaisedButton(
-            color: Colors.blue[200],
-            child: Text('add to cart'),
+            //color: Colors.blue[200],
+            child: Text('Add to List'),
             textColor: Colors.black,
             onPressed: () async {
               await DatabaseService(uid: user.uid).addToCart(

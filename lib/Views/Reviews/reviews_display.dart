@@ -119,21 +119,20 @@ class StoreReviews extends StatelessWidget {
               child: getLocation(locationID),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 10.0, left: 275),
-              child: FlatButton.icon(
-                textColor: Colors.black,
-                color: Colors.blue[200],
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddReview(data: storedata)),
-                  );
-                },
-                icon: Icon(Icons.add, size: 18),
-                label: Text("Add Review"),
-              ),
+              padding: EdgeInsets.only(top: 10.0, left: 295),
+              child: RaisedButton(
+                  textColor: Colors.black,
+                  color: Theme.of(context).buttonColor,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddReview(data: storedata)),
+                    );
+                  },
+                  child: Text('Add Review')),
             ),
+
             // In case I add average reviews feature on the header bar (TBD)
             Padding(
               padding: EdgeInsets.only(top: 68.0, left: 10.0),
@@ -206,11 +205,7 @@ class StoreReviews extends StatelessWidget {
           iconTheme: IconThemeData(color: Colors.black),
           title: Text(
             appBarTitle,
-            style: TextStyle(
-              color: Colors.black,
-            ),
           ),
-          backgroundColor: Colors.blue[200],
           centerTitle: true,
           actions: [
             IconButton(

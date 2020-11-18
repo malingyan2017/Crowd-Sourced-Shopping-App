@@ -98,7 +98,7 @@ class SideDrawer extends StatelessWidget {
               height: _userPaneSize(context),
               child: DrawerHeader(
                 decoration: BoxDecoration(
-                  color: Colors.blue[200],
+                  color: Theme.of(context).primaryColor,
                 ),
                 child: userStream,
               )),
