@@ -20,7 +20,7 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
-    return Column(
+    return Row(
       children: [
         DropdownButton<int>(
           hint: Text('quantity'),
@@ -38,19 +38,25 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
             );
           }).toList(),
         ),
+        SizedBox(width: 130),
+        //Positioned(
+        // left: 50,
+        //child:
         RaisedButton(
-            //color: Colors.blue[200],
-            child: Text('Add to List'),
-            textColor: Colors.black,
-            onPressed: () async {
-              await DatabaseService(uid: user.uid).addToCart(
-                widget.docId,
-                widget.data['name'],
-                widget.data['pictureUrl'],
-                quantity,
-                widget.data['barcode'],
-              );
-            }),
+          //color: Colors.blue[200],
+          child: Text('Add to List'),
+          textColor: Colors.black,
+          onPressed: () async {
+            await DatabaseService(uid: user.uid).addToCart(
+              widget.docId,
+              widget.data['name'],
+              widget.data['pictureUrl'],
+              quantity,
+              widget.data['barcode'],
+            );
+          },
+        ),
+        //),
       ],
     );
   }
