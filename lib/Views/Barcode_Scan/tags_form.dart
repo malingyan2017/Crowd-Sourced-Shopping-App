@@ -41,6 +41,7 @@ class _TagsFormState extends State<TagsForm> {
             height: 20,
           ),
           TextFormField(
+            initialValue: 'tags',
             decoration: InputDecoration(
               hintText: 'Enter new tag',
               border: OutlineInputBorder(),

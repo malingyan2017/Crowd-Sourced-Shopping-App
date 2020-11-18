@@ -52,6 +52,7 @@ class _UpdateFormState extends State<UpdateForm> {
             height: 20,
           ),
           TextFormField(
+            initialValue: '0.0',
             decoration: InputDecoration(
               hintText: 'Enter new price',
               border: OutlineInputBorder(),
@@ -70,7 +71,7 @@ class _UpdateFormState extends State<UpdateForm> {
             padding: const EdgeInsets.all(8.0),
             child: DropdownButton<bool>(
               hint: Text('On Sale?'),
-              value: saleOrNot,
+              value: saleOrNot ?? false,
               items: onsales.map((choice) {
                 return DropdownMenuItem(
                     child: Text(choice.toString()), value: choice);
