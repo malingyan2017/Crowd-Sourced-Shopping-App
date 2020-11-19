@@ -10,6 +10,7 @@ import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
 import 'package:shopping_app/Models/store.dart';
+import 'package:intl/intl.dart';
 
 class ScanResult extends StatefulWidget {
   final String scan_result;
@@ -47,6 +48,15 @@ class _ScanResultState extends State<ScanResult> {
         });
   }
 
+  //mask the dropdown menu for user friendly purpose.
+  String yesOrNo(bool choice) {
+    if (choice) {
+      return 'Yes';
+    } else {
+      return 'No';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
@@ -70,9 +80,7 @@ class _ScanResultState extends State<ScanResult> {
               preferredStore = Store.storeFromMap(data['preferredLocation']);
             }
 
-            String storeId;
-            //String storeName;
-            //String storeZipcode;
+            //String storeId;
 
             return widget.scan_result == ''
                 ? preferredStore == null
@@ -108,6 +116,14 @@ class _ScanResultState extends State<ScanResult> {
                             //stream to get storeItem's update user info
                             var userUpdateId = data['userId'];
                             var itemId = data.id;
+                            Timestamp timestamp = data['dateUpdated'];
+                            DateTime myDateTime =
+                                DateTime.parse(timestamp.toDate().toString());
+                            String formattedDateTime =
+                                DateFormat('MM-dd-yyyy').format(myDateTime);
+
+                            String salesInfo =
+                                'on sales : ${yesOrNo(data['onSale'])}';
 
                             return StreamBuilder<DocumentSnapshot>(
                                 stream: DatabaseService(uid: userUpdateId)
@@ -178,7 +194,8 @@ class _ScanResultState extends State<ScanResult> {
                                                                     .bold),
                                                       ),
                                                       Text(
-                                                        '\$' '${data['price']}',
+                                                        '\$'
+                                                        '${data['price'].toStringAsFixed(2)}',
                                                         style: TextStyle(
                                                           color:
                                                               Colors.green[800],
@@ -190,9 +207,8 @@ class _ScanResultState extends State<ScanResult> {
                                                       Text(
                                                           'update by: $userUpdateName'),
                                                       Text(
-                                                          'updated on: ${data['dateUpdated'].toDate().toString()}'),
-                                                      Text(
-                                                          'on sale: ${data['onSale']}')
+                                                          'updated on: $formattedDateTime'),
+                                                      Text(salesInfo),
                                                     ],
                                                   ),
                                                 ],

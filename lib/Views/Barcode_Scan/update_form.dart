@@ -29,6 +29,15 @@ class _UpdateFormState extends State<UpdateForm> {
     return double.tryParse(result) != null;
   }
 
+  //mask the dropdown menu for user friendly purpose.
+  String yesOrNo(bool choice) {
+    if (choice) {
+      return 'Yes';
+    } else {
+      return 'No';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
@@ -52,7 +61,7 @@ class _UpdateFormState extends State<UpdateForm> {
             height: 20,
           ),
           TextFormField(
-            initialValue: '0.0',
+            initialValue: '0.00',
             decoration: InputDecoration(
               hintText: 'Enter new price',
               border: OutlineInputBorder(),
@@ -74,7 +83,7 @@ class _UpdateFormState extends State<UpdateForm> {
               value: saleOrNot ?? false,
               items: onsales.map((choice) {
                 return DropdownMenuItem(
-                    child: Text(choice.toString()), value: choice);
+                    child: Text(yesOrNo(choice)), value: choice);
               }).toList(),
               onChanged: (value) {
                 setState(() {
