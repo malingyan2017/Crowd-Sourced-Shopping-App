@@ -252,25 +252,23 @@ class _ScanResultState extends State<ScanResult> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    'Item tags:',
+                                                    'Popular Item Tags:',
                                                     style: TextStyle(
                                                         color: Colors.black87,
                                                         fontWeight:
                                                             FontWeight.bold),
                                                   ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      for (var item in tags)
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                      .fromLTRB(
-                                                                  0, 8, 8, 8),
-                                                          child: Text(item),
-                                                        ),
-                                                    ],
+                                                  SizedBox(
+                                                    height: 80,
+                                                    child: ListView.builder(
+                                                        shrinkWrap: true,
+                                                        itemCount: tags.length,
+                                                        itemBuilder:
+                                                            (BuildContext ctxt,
+                                                                int index) {
+                                                          return Text(
+                                                              tags[index]);
+                                                        }),
                                                   ),
                                                   SizedBox(
                                                     width: 120,

@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Database/database.dart';
@@ -48,12 +51,18 @@ class _TagsFormState extends State<TagsForm> {
               hintText: 'Enter new tag',
               border: OutlineInputBorder(),
             ),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+            ],
             validator: (val) {
               if (widget.tags.contains(val)) {
                 return 'Tag Already Exists';
               }
               if (val.isEmpty || val == '') {
                 return 'Please Enter a Tag';
+              }
+              if (val.length > maxLength) {
+                return 'Please Only Enter $maxLength Characters';
               }
 
               return null;
