@@ -41,6 +41,14 @@ class _BarcodeScanState extends State<BarcodeScan> {
     });
   }
 
+  String maskResult(String barcode) {
+    if (barcode == '-1') {
+      return 'You cancel the camera';
+    } else {
+      return barcode;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamProvider<QuerySnapshot>.value(
@@ -61,7 +69,7 @@ class _BarcodeScanState extends State<BarcodeScan> {
             ),
           ),
           SizedBox(height: 20),
-          Text(scanResult),
+          Text(maskResult(scanResult)),
           ScanResult(
             scan_result: scanResult,
           ),

@@ -18,6 +18,8 @@ class TagsForm extends StatefulWidget {
 class _TagsFormState extends State<TagsForm> {
   final _formKey = GlobalKey<FormState>();
   String _tag;
+  static const int maxLength = 10;
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
@@ -41,18 +43,19 @@ class _TagsFormState extends State<TagsForm> {
             height: 20,
           ),
           TextFormField(
-            initialValue: 'tags',
+            maxLength: maxLength,
             decoration: InputDecoration(
               hintText: 'Enter new tag',
               border: OutlineInputBorder(),
             ),
             validator: (val) {
               if (widget.tags.contains(val)) {
-                return 'tag already exists';
+                return 'Tag Already Exists';
               }
-              if (val.isEmpty) {
-                return 'please enter a tag';
+              if (val.isEmpty || val == '') {
+                return 'Please Enter a Tag';
               }
+
               return null;
             },
             onChanged: (val) => setState(() => _tag = val),
@@ -66,10 +69,10 @@ class _TagsFormState extends State<TagsForm> {
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
                     await DatabaseService().addTag(_tag, widget.itemId);
+                    await DatabaseService(uid: user.uid)
+                        .updateRankPoints(1, user.uid);
+                    Navigator.pop(context);
                   }
-                  await DatabaseService(uid: user.uid)
-                      .updateRankPoints(1, user.uid);
-                  Navigator.pop(context);
                 }),
           ),
         ],

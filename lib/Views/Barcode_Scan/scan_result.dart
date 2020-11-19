@@ -98,7 +98,7 @@ class _ScanResultState extends State<ScanResult> {
                         return Text('Loading');
                       }
                       if (snapshot.data.docs.isEmpty) {
-                        return Text('no item found for this barcode');
+                        return Text('No item found for this barcode');
                       }
                       if (snapshot.hasError) {
                         return Text('Something went wrong');
@@ -123,7 +123,7 @@ class _ScanResultState extends State<ScanResult> {
                                 DateFormat('MM-dd-yyyy').format(myDateTime);
 
                             String salesInfo =
-                                'on sales : ${yesOrNo(data['onSale'])}';
+                                'On Sales : ${yesOrNo(data['onSale'])}';
 
                             return StreamBuilder<DocumentSnapshot>(
                                 stream: DatabaseService(uid: userUpdateId)
@@ -205,9 +205,9 @@ class _ScanResultState extends State<ScanResult> {
                                                         ),
                                                       ),
                                                       Text(
-                                                          'update by: $userUpdateName'),
+                                                          'Update By: $userUpdateName'),
                                                       Text(
-                                                          'updated on: $formattedDateTime'),
+                                                          'Updated On: $formattedDateTime'),
                                                       Text(salesInfo),
                                                     ],
                                                   ),
