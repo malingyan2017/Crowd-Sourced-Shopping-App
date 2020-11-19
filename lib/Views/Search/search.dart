@@ -45,65 +45,70 @@ class _SearchState extends State<Search> {
         ),
         Flexible(
           child: StreamBuilder<QuerySnapshot>(
-              //if no search, show 3 items, if there is search, show specific items found
-              stream: (searchName != '' && searchName != null)
-                  ? specificItems.snapshots()
-                  : items.limit(10).snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Text('Loading');
-                }
-                if (snapshot.data.docs.isEmpty) {
-                  return Text('no item found for this name');
-                }
-                if (snapshot.hasError) {
-                  return Text('Something went wrong');
-                }
-                return (snapshot.connectionState == ConnectionState.waiting)
-                    ? Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                        itemCount: snapshot.data.docs.length,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot data = snapshot.data.docs[index];
-                          String docId = data.id;
-                          return Card(
-                              child: Row(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                               child: CachedNetworkImage(
-                                imageUrl: data['pictureUrl'],
-                                placeholder: (context, url) =>
-                                    CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
-                              ),
-                              ),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${data['name']}',
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
+            //if no search, show 3 items, if there is search, show specific items found
+            stream: (searchName != '' && searchName != null)
+                ? specificItems.snapshots()
+                : items.limit(10).snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Text('Loading');
+              }
+              if (snapshot.data.docs.isEmpty) {
+                return Text('no item found for this name');
+              }
+              if (snapshot.hasError) {
+                return Text('Something went wrong');
+              }
+              return (snapshot.connectionState == ConnectionState.waiting)
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: snapshot.data.docs.length,
+                      itemBuilder: (context, index) {
+                        DocumentSnapshot data = snapshot.data.docs[index];
+                        String docId = data.id;
+                        return SizedBox(
+                          height: 85,
+                          child: Card(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  child: CachedNetworkImage(
+                                    imageUrl: data['pictureUrl'],
+                                    placeholder: (context, url) =>
+                                        CircularProgressIndicator(),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${data['name']}',
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  MyDropDownButton(
-                                    data: data,
-                                    docId: docId,
-                                  ),
-                                ],
-                              )
-                            ],
-                          ));
-                        },
-                      );
-              }),
+                                    MyDropDownButton(
+                                      data: data,
+                                      docId: docId,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+            },
+          ),
         ),
       ],
     );

@@ -217,7 +217,7 @@ class _ScanResultState extends State<ScanResult> {
                                             SizedBox(
                                               width: 120,
                                               child: RaisedButton(
-                                                color: Colors.blue[200],
+                                                //color: Theme.of(context).accentColor,
                                                 child: Text('Update Price'),
                                                 onPressed: () =>
                                                     _showUpdateForm(
@@ -275,7 +275,7 @@ class _ScanResultState extends State<ScanResult> {
                                                   SizedBox(
                                                     width: 120,
                                                     child: RaisedButton(
-                                                      color: Colors.blue[200],
+                                                      //color: Theme.of(context).accentColor,
                                                       child: Text('Add Tags'),
                                                       onPressed: () =>
                                                           _showTagsForm(

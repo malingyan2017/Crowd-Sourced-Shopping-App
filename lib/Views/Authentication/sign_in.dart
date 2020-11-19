@@ -86,7 +86,6 @@ class _SignInState extends State<SignIn> {
             ),
             RaisedButton(
               child: Text('Sign In'),
-              color: Colors.blue[200],
               textColor: Colors.black,
               onPressed: () async {
                 if (_formKey.currentState.validate()) {

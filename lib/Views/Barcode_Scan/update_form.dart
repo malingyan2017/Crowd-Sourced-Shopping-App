@@ -98,7 +98,7 @@ class _UpdateFormState extends State<UpdateForm> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: RaisedButton(
-                color: Colors.blue[200],
+                //color: Theme.of(context).accentColor,
                 child: Text('Update Price'),
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {

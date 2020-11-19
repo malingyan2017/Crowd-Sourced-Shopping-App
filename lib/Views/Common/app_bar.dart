@@ -20,19 +20,13 @@ class MyAppBar extends StatelessWidget with PreferredSizeWidget {
           color: Colors.black,
         ),
       ),
-      backgroundColor: Colors.blue[200],
-      iconTheme: new IconThemeData(
-        color: Colors.black,
-      ),
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.shopping_cart),
           iconSize: 32,
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) => ShoppingListView()
-              )
-            );
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ShoppingListView()));
           },
         ),
       ],

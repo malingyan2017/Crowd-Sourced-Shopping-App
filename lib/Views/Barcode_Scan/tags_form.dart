@@ -61,7 +61,7 @@ class _TagsFormState extends State<TagsForm> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: RaisedButton(
-                color: Colors.blue[200],
+                //color: Theme.of(context).buttonColor,
                 child: Text('Add Tag'),
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {

@@ -139,9 +139,9 @@ class _StoreDropDownState extends State<_StoreDropDown> {
       Padding(padding: EdgeInsets.all(10)),
       Row(
         children: <Widget>[
-          FlatButton(
+          RaisedButton(
               textColor: Colors.black,
-              color: Colors.blue[200],
+              color: Theme.of(context).buttonColor,
               onPressed: () async {
                 locationSaved = false;
                 errorOccurred = false;

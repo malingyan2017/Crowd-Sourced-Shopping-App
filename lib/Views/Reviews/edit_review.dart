@@ -26,11 +26,7 @@ class EditReview extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.black),
         title: Text(
           appBarTitle,
-          style: TextStyle(
-            color: Colors.black,
-          ),
         ),
-        backgroundColor: Colors.blue[200],
         centerTitle: true,
         actions: [
           IconButton(
@@ -167,7 +163,7 @@ class MyCustomFormState extends State<MyCustomForm> {
             padding:
                 const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
             child: RaisedButton(
-              color: Colors.blue[200],
+              color: Theme.of(context).buttonColor,
               onPressed: () => validateForm(),
               //onPressed: () => null,
               child: Text('Update'),
