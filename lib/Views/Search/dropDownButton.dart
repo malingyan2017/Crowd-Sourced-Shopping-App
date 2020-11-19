@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Database/database.dart';
 
+import "dart:async";
+
 class MyDropDownButton extends StatefulWidget {
   final DocumentSnapshot data;
   final String docId;
@@ -54,6 +56,9 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
               quantity,
               widget.data['barcode'],
             );
+            Scaffold.of(context).showSnackBar(SnackBar(
+              content: Text('An Item Has Been Added.'),
+            ));
           },
         ),
         //),
