@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shopping_app/Constants/database_constants.dart';
 import 'package:shopping_app/Models/list_item.dart';
 import 'package:shopping_app/Models/review.dart';
@@ -441,6 +442,13 @@ class DatabaseService {
       .snapshots();
   }
 
+  Future<QuerySnapshot> getStoreQueryFromZipcode(String zipCode) {
+
+    return storeCollection
+      .where('zipCode', isEqualTo: zipCode)
+      .get();
+  }
+
   Stream<QuerySnapshot> getStoreItemsStreamFromBarcodes(String storeId, List<String> barcodes) {
 
     return storeCollection
@@ -449,6 +457,53 @@ class DatabaseService {
       .where('barcode', whereIn: barcodes)
       .orderBy('name')
       .snapshots();
+  }
+
+  Future<QuerySnapshot> getStoreItemsQueryFromBarcodes(String storeId, List<String> barcodes) {
+
+    return storeCollection
+      .doc(storeId)
+      .collection(DatabaseConstants.storeItems)
+      .where('barcode', whereIn: barcodes)
+      .orderBy('name')
+      .get();
+  }
+
+  Stream getStoresWithStoreItems(List<Store> stores, List<String> barcodes) {
+
+    List<Stream> listOfStreams = [];
+
+    stores.forEach((Store currentStore) { 
+      listOfStreams.add(getStoreItemsStreamFromBarcodes(currentStore.id, barcodes));
+    });
+
+    // https://pub.dev/documentation/rxdart/latest/rx/CombineLatestStream-class.html
+    // https://stackoverflow.com/questions/51880330/flutter-stream-two-streams-into-a-single-screen
+    return CombineLatestStream(
+      listOfStreams, 
+      (values) {
+        int i = 0;
+
+        return values.map<Store>((snapshot) {
+
+          Store oldStore = stores[i];
+
+          Store newStore = Store(
+            id: oldStore.id,
+            name: oldStore.name,
+            streetAddress: oldStore.streetAddress,
+            city: oldStore.city,
+            state: oldStore.state,
+            zipCode: oldStore.zipCode,
+            items: queryToStoreItemList(snapshot.docs)
+          );
+
+          i++;
+
+          return newStore;
+        }).toList();
+      }
+    );
   }
 
   // Converts a list of queries into a list of storeItem objects.

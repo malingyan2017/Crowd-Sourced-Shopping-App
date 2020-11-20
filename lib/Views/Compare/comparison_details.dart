@@ -17,7 +17,6 @@ import 'package:shopping_app/Util/measure.dart';
 class ComparisonDetails extends StatelessWidget {
   final Store store;
   final List<String> barcodes;
-  //final Stream<QuerySnapshot> storeItemsStream;
 
   ComparisonDetails({Key key, this.store, this.barcodes}) : super(key: key);
 
@@ -39,7 +38,6 @@ class ComparisonDetails extends StatelessWidget {
 class _DetailBody extends StatefulWidget {
   final Store store;
   final List<String> barcodes;
-  //final Stream<QuerySnapshot> storeItemsStream;
 
   _DetailBody({Key key, this.store, this.barcodes}) : super(key: key);
 
@@ -85,13 +83,12 @@ class _DetailBodyState extends State<_DetailBody> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                      //shrinkWrap: true,
-                      //physics: NeverScrollableScrollPhysics(),
-                      //scrollDirection: Axis.vertical,
-                      itemCount: storeItemTiles.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return storeItemTiles[index];
-                      }),
+                    itemCount: storeItemTiles.length,
+                    itemBuilder: (BuildContext context, int index) {
+
+                      return storeItemTiles[index];
+                    }
+                  ),
                 )
               ],
             ),

@@ -134,7 +134,8 @@ class _CompareBodyState extends State<_CompareBody> {
           return Text("Something went wrong");
         }
         else if (snapshot.hasData) {
-          return createBody(context, snapshot, db);
+
+          return createBody(context, db.queryToStoreList(snapshot.data.docs), db);
         }
         else {
           return CenteredLoadingCircle(
@@ -146,24 +147,55 @@ class _CompareBodyState extends State<_CompareBody> {
     );
   }
 
-  Widget createBody(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot, DatabaseService db) {
+  Widget createBody(BuildContext context, List<Store> matchingStores, DatabaseService db) {
 
-    // Our current snapshot is a list of store documents
-    List<Store> matchingStores = db.queryToStoreList(snapshot.data.docs);
+    return StreamBuilder(
+      stream: db.getStoresWithStoreItems(matchingStores, widget.shoppingList.barcodeList()),
+      builder: (BuildContext context, snapshot) {
 
-    return ListView.builder(
-      
-      itemCount: matchingStores.length,
-      itemBuilder: (BuildContext context, int index) {
-        DocumentSnapshot document = snapshot.data.docs[index];
-        Map<String, dynamic> data = document.data();
-        data['id'] = document.id;
-        Store store = Store.storeFromMap(data);
+        if (snapshot.hasError) {
+          return Text("Something went wrong");
+        }
+        else if (snapshot.hasData) {
 
-        return _StoreTile(store: store, shoppingList: widget.shoppingList);
+          List<Store> filledMatchingStores = snapshot.data;
+
+          List<_SortingStruct> sortedList = createSortedList(filledMatchingStores);
+
+          return ListView.builder(   
+            itemCount: sortedList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return _StoreTile(store: sortedList[index].store, shoppingList: widget.shoppingList);
+            },
+          );
+        }
+        else {
+          return CenteredLoadingCircle(
+            height: Measure.screenHeightFraction(context, .2),
+            width: Measure.screenWidthFraction(context, .4),
+          );
+        }
       },
     );
+  }
 
+  List<_SortingStruct> createSortedList(List<Store> filledStores) {
+
+    List<_SortingStruct> sortedList = [];
+
+    filledStores.forEach((element) { 
+
+      _addStoreItemQuantity(element, widget.shoppingList);
+
+      sortedList.add(_SortingStruct(
+        store: element,
+        total: _getTotalPrice(element.items)
+      ));
+    });
+
+    sortedList.sort((a, b) => a.total.compareTo(b.total));
+
+    return sortedList;
   }
 }
 
@@ -206,27 +238,6 @@ class _StoreTileState extends State<_StoreTile> {
           _addStoreItemQuantity(widget.store, widget.shoppingList);
 
           double total = _getTotalPrice(widget.store.items);
-          // https://stackoverflow.com/questions/54152176/listview-inside-expansiontile-doesnt-work
-          // List<Widget> storeItemTiles = _getStoreItemTiles(widget.store.items);
-
-          // https://stackoverflow.com/questions/39958472/dart-numberformat
-          // return ExpansionTile(
-          //   title: Text('${widget.store.name} - ${widget.store.streetAddress}'),
-          //   subtitle: Text('Total Price ${total.toStringAsFixed(2)}'),
-          //   //trailing: Text('Total Price $total'),
-          //   children: [
-          //     ListView.builder(
-          //       shrinkWrap: true,
-          //       physics: NeverScrollableScrollPhysics(),
-          //       scrollDirection: Axis.vertical,
-          //       itemCount: storeItemTiles.length,
-          //       itemBuilder: (BuildContext context, int index) {
-
-          //         return storeItemTiles[index];
-          //       }
-          //     )
-          //   ],
-          // );
 
           return ListTile(
             title: Text('${widget.store.name} - ${widget.store.streetAddress}'),
@@ -256,187 +267,34 @@ class _StoreTileState extends State<_StoreTile> {
     );
   }
 
-  // List<Widget> _getStoreItemTiles(List<StoreItem> storeItemsList) {
-
-  //   List<Widget> list = [];
-
-  //   storeItemsList.forEach((StoreItem storeItem) { 
-  //     list.add(_StoreItemTile(
-  //       storeItem: storeItem,
-  //       store: widget.store,
-  //     ));
-  //   });
-
-  //   return list;
-  // }
-
-  double _getTotalPrice(List<StoreItem> storeItems) {
-
-    double total = 0;
-
-    storeItems.forEach((StoreItem storeItem) {
-      total += storeItem.price * storeItem.quantity;
-    });
-
-    return total;
-  }
-
-  void _addStoreItemQuantity(Store store, ShoppingList shoppingList) {
-
-    store.items.forEach((StoreItem storeItem) { 
-
-      ListItem listItem = 
-        shoppingList.items.firstWhere((element) => element.barcode == storeItem.barcode);
-      
-      storeItem.quantity = listItem.quantity;
-    });
-  }
-
 }
 
-// class _StoreItemTile extends StatefulWidget {
+double _getTotalPrice(List<StoreItem> storeItems) {
 
-//   final StoreItem storeItem;
-//   final Store store;
+  double total = 0;
 
-//   _StoreItemTile({Key key, this.storeItem, this.store}) : super(key: key);
+  storeItems.forEach((StoreItem storeItem) {
+    total += storeItem.price * storeItem.quantity;
+  });
 
-//   @override
-//   _StoreItemTileState createState() => _StoreItemTileState();
-// }
+  return total;
+}
 
-// // The structure is taken from the livefeed_price_updates file that Jasmine wrote.
-// class _StoreItemTileState extends State<_StoreItemTile> {
+void _addStoreItemQuantity(Store store, ShoppingList shoppingList) {
 
-//   final FirebaseAuth auth = FirebaseAuth.instance;
+  store.items.forEach((StoreItem storeItem) { 
 
-//   // Text Widget to Bold Item Text
-//   Text itemInfoText(String text) {
-//     return Text(
-//       text,
-//       style: CustomTextStyle.itemInfo
-//     );
-//   }
+    ListItem listItem = 
+      shoppingList.items.firstWhere((element) => element.barcode == storeItem.barcode);
+    
+    storeItem.quantity = listItem.quantity;
+  });
+}
 
-//   // Text Widget for Price Styling
-//   Text itemPriceText(String text) {
-//     return Text(
-//       text,
-//       style: CustomTextStyle.itemPrice
-//     );
-//   }
+class _SortingStruct {
 
-//   Widget build(BuildContext context) {
- 
-//     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
+  Store store;
+  double total;
 
-//     Widget userInfo(Map<String, dynamic> userData) {
-
-//       // Calculate User's rank and retrieve icon
-//       int userPoints = userData['rankPoints'];
-//       Icon icon = db.getRankIcon(userPoints);
-//       String user = 'Updated by: ' + userData['username'] + ' ';
-
-//       return Row(
-//         children: <Widget>[
-//           Text(user), icon, 
-//         ],
-//       );
-//     }
-
-//     Widget locationInfo() {
-
-//       String message = widget.store.name + ' in ' + widget.store.cityStateZip;
-      
-//       return Text(message);
-//     }
-
-//     return StreamBuilder<DocumentSnapshot>(
-//       stream: db.getUserStream(auth.currentUser.uid),
-//       builder: (context, snapshot) {
-//         if (snapshot.hasError) {
-//           return Text("Something went wrong");
-//         } else if (snapshot.hasData) {
-
-//           // Get formatted time stamp of when price update was posted
-//           // Timestamp timestamp = data['dateUpdated'] ;
-//           // DateTime myDateTime =
-//           //     DateTime.parse(timestamp.toDate().toString());
-//           String formattedDateTime =
-//               DateFormat('MM-dd-yyyy').format(widget.storeItem.lastUpdate);
-
-//           // Variables to Hold Store Item Info
-//           var itemName = widget.storeItem.name;
-//           var itemPrice = '\$' + widget.storeItem.price.toString();
-//           var onSale = widget.storeItem.onSale;
-
-//           return SizedBox(
-//             height: 90,
-//             child: Card(
-//               child: Stack(
-//                 children: <Widget>[
-//                   Row(
-//                     children: <Widget>[
-//                       Container(
-//                         width: 60,
-//                         height: 60,
-//                         decoration: BoxDecoration(
-//                           image: DecorationImage(
-//                             image: NetworkImage(widget.storeItem.pictureUrl),
-//                           ),
-//                         ),
-//                       ),
-//                       Padding(
-//                         padding: EdgeInsets.only(left: 8.0, bottom: 25.0),
-//                         child: itemInfoText(itemName),
-//                       ),
-//                     ],
-//                   ),
-//                   Positioned(
-//                     top: 10,
-//                     right: 3,
-//                     child: Stack(
-//                       children: <Widget>[
-//                         Text('$formattedDateTime'),
-//                       ],
-//                     ),
-//                   ),
-//                   Positioned(
-//                     top: 30,
-//                     left: 70,
-//                     child: itemPriceText(itemPrice),
-//                   ),
-//                   Positioned(
-//                     left: 45,
-//                     top: 46,
-//                     child: Checkbox(
-//                       checkColor: Colors.black,
-//                       onChanged: null,
-//                       value: onSale,
-//                     ),
-//                   ),
-//                   Positioned(
-//                     left: 0.2,
-//                     bottom: 3,
-//                     child: Text('On Sale?'),
-//                   ),
-//                   Positioned(
-//                     top: 43,
-//                     right: 3,
-//                     child: userInfo(snapshot.data.data()),
-//                   ),
-//                   Positioned(
-//                     bottom: 1,
-//                     right: 3,
-//                     child: locationInfo(),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           );
-//         }
-//         return Center(child: CircularProgressIndicator());
-//       },
-//     );
-//   }
-// }
+  _SortingStruct({this.store, this.total});
+}
