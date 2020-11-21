@@ -235,14 +235,9 @@ class _StoreItemTileState extends State<_StoreItemTile> {
                     child: Text('On Sale?'),
                   ),
                   Positioned(
-                    top: 43,
-                    right: 3,
-                    child: userInfo(snapshot.data.data()),
-                  ),
-                  Positioned(
                     bottom: 1,
                     right: 3,
-                    child: locationInfo(),
+                    child: userInfo(snapshot.data.data()),
                   ),
                 ],
               ),

@@ -48,16 +48,16 @@ class _CompareState extends State<Compare> {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Store Recommendations'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.home),
-            iconSize: 32,
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.home),
+        //     iconSize: 32,
+        //     onPressed: () {
+        //       Navigator.pop(context);
+        //       Navigator.pop(context);
+        //     },
+        //   ),
+        // ],
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: getDatabaseInfo(),

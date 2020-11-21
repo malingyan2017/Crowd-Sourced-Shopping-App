@@ -106,15 +106,15 @@ class _ScaffoldTemplate extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text(title),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.home),
-            iconSize: 32,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.home),
+        //     iconSize: 32,
+        //     onPressed: () {
+        //       Navigator.pop(context);
+        //     },
+        //   ),
+        // ],
       ),
       body: body,
       persistentFooterButtons: [button],
