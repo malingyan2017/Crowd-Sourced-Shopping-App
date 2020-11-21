@@ -2,17 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:shopping_app/Components/centered_loading_circle.dart';
+import 'package:shopping_app/Components/store_total_card.dart';
 import 'package:shopping_app/Database/database.dart';
-import 'package:shopping_app/Models/list_item.dart';
 import 'package:shopping_app/Models/shopping_list.dart';
 import 'package:shopping_app/Models/store.dart';
-import 'package:shopping_app/Models/store_item.dart';
 import 'package:shopping_app/Models/the_user.dart';
-import 'package:shopping_app/Style/custom_text_style.dart';
-import 'package:shopping_app/Util/helper.dart';
-import 'package:shopping_app/Util/measure.dart';
+import 'package:shopping_app/Util/store_comparison_helper.dart';
 import 'package:shopping_app/Views/Compare/comparison_details.dart';
 
 
@@ -78,10 +74,7 @@ class _CompareState extends State<Compare> {
             );
           }
           else {
-            return CenteredLoadingCircle(
-              height: Measure.screenHeightFraction(context, .2),
-              width: Measure.screenWidthFraction(context, .4),
-            );
+            return CenteredLoadingCircle();
           }
         },
       ),
@@ -139,10 +132,7 @@ class _CompareBodyState extends State<_CompareBody> {
           return createBody(context, db.queryToStoreList(snapshot.data.docs), db);
         }
         else {
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
+          return CenteredLoadingCircle();
         }
       },
     );
@@ -175,10 +165,7 @@ class _CompareBodyState extends State<_CompareBody> {
           );
         }
         else {
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
+          return CenteredLoadingCircle();
         }
       },
     );
@@ -215,26 +202,23 @@ class _StoreTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Card(
-      child: ListTile(
-        title: Text('${store.name} - ${store.streetAddress}'),
-        subtitle: Text('Total Price \$${total.toStringAsFixed(2)}'),
-        trailing: Icon(Icons.arrow_forward),
-        onTap: () { 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ComparisonDetails(
-                store: store,
-                shoppingList: shoppingList,
-              )
-            ),
-          );
-        },
-      ),
+    return StoreTotalCard(
+      store: store,
+      total: total,
+      trailing: Icon(Icons.arrow_forward),
+      onTap: () { 
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ComparisonDetails(
+              store: store,
+              shoppingList: shoppingList,
+            )
+          ),
+        );
+      },
     );
   }
-
 }
 
 class _SortingStruct {

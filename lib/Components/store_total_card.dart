@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Models/store.dart';
 
-class StoreCard extends StatelessWidget {
+class StoreTotalCard extends StatelessWidget {
 
   final Store store;
   final double total;
@@ -9,7 +9,7 @@ class StoreCard extends StatelessWidget {
   final Widget trailing;
   final Function() onTap;
 
-  StoreCard({
+  StoreTotalCard({
     Key key, 
     this.store, 
     this.total, 

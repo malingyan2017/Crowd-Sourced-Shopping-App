@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shopping_app/Components/centered_loading_circle.dart';
+import 'package:shopping_app/Components/store_total_card.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/shopping_list.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
 import 'package:shopping_app/Style/custom_text_style.dart';
-import 'package:shopping_app/Util/helper.dart';
-import 'package:shopping_app/Util/measure.dart';
+import 'package:shopping_app/Util/store_comparison_helper.dart';
 
 // This could potentially be done using all of the information collected by
 // the comparison page.  I believe the objective is for the information to update
@@ -74,12 +74,9 @@ class _DetailBodyState extends State<_DetailBody> {
           return Container(
             child: Column(
               children: [
-                Card(
-                  child: ListTile(
-                    title: Text(
-                        '${widget.store.name} - ${widget.store.streetAddress}'),
-                    subtitle: Text('Total Price ${total.toStringAsFixed(2)}'),
-                  ),
+                StoreTotalCard(
+                  store: widget.store,
+                  total: total,
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -94,10 +91,7 @@ class _DetailBodyState extends State<_DetailBody> {
             ),
           );
         } else {
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
+          return CenteredLoadingCircle();
         }
       },
     );
