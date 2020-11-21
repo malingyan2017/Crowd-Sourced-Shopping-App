@@ -148,44 +148,44 @@ class _ListItemCard extends StatelessWidget {
     // https://api.flutter.dev/flutter/material/ListTile-class.html
     return Card(
       child: ListTile(
-          isThreeLine: true,
-          leading: Container(
-            width: Measure.screenWidthFraction(context, .2),
-            height: Measure.screenHeightFraction(context, .2),
-            child: CachedNetworkImage(
-              imageUrl: item.pictureUrl,
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
-            ),
+        isThreeLine: true,
+        leading: Container(
+          width: Measure.screenWidthFraction(context, .2),
+          height: Measure.screenHeightFraction(context, .2),
+          child: CachedNetworkImage(
+            imageUrl: item.pictureUrl,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
           ),
+        ),
 
-          //Image.network(widget.item.pictureUrl),
-          title: Text(
-            '${item.name}',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: _ListItemDropDownButton(
-            item: item,
-          ),
-          trailing: RaisedButton(
-              child: Text('Remove'),
+        //Image.network(widget.item.pictureUrl),
+        title: Text(
+          '${item.name}',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: _ListItemDropDownButton(
+          item: item,
+        ),
+        trailing: RaisedButton(
+            child: Text('Remove'),
 
-              onPressed: () async {
-                try {
-
-                  Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Removing ${item.name} from your list.')
-                    )
-                  );
-
-                  await db.removeShoppingListItem(item.listItemId);
-                } catch (error) {
-                  Scaffold.of(context).showSnackBar(
-                    SnackBar(content: Text(itemRemovalErrorMessage)));
-                }
-              })),
+            onPressed: () async {
+              try {
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Removing ${item.name} from your list.')
+                  )
+                );
+                await db.removeShoppingListItem(item.listItemId);
+              } catch (error) {
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(content: Text(itemRemovalErrorMessage)));
+              }
+            }
+        )
+      ),
     );
   }
 }

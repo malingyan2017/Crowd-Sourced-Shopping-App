@@ -158,12 +158,6 @@ class _StoreItemTileState extends State<_StoreItemTile> {
       );
     }
 
-    Widget locationInfo() {
-      String message = widget.store.name + ' in ' + widget.store.cityStateZip;
-
-      return Text(message);
-    }
-
     return StreamBuilder<DocumentSnapshot>(
       stream: db.getUserStream(auth.currentUser.uid),
       builder: (context, snapshot) {
