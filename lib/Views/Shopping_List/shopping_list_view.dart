@@ -170,12 +170,20 @@ class _ListItemCard extends StatelessWidget {
           ),
           trailing: RaisedButton(
               child: Text('Remove'),
+
               onPressed: () async {
                 try {
+
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removing ${item.name} from your list.')
+                    )
+                  );
+
                   await db.removeShoppingListItem(item.listItemId);
                 } catch (error) {
                   Scaffold.of(context).showSnackBar(
-                      SnackBar(content: Text(itemRemovalErrorMessage)));
+                    SnackBar(content: Text(itemRemovalErrorMessage)));
                 }
               })),
     );
