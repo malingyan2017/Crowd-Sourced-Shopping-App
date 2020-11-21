@@ -11,6 +11,7 @@ import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
 import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Style/custom_text_style.dart';
+import 'package:shopping_app/Util/helper.dart';
 import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Compare/comparison_details.dart';
 
@@ -165,7 +166,11 @@ class _CompareBodyState extends State<_CompareBody> {
           return ListView.builder(   
             itemCount: sortedList.length,
             itemBuilder: (BuildContext context, int index) {
-              return _StoreTile(store: sortedList[index].store, shoppingList: widget.shoppingList);
+              return _StoreTile(
+                store: sortedList[index].store, 
+                total: sortedList[index].total,
+                shoppingList: widget.shoppingList,
+              );
             },
           );
         }
@@ -185,11 +190,9 @@ class _CompareBodyState extends State<_CompareBody> {
 
     filledStores.forEach((element) { 
 
-      _addStoreItemQuantity(element, widget.shoppingList);
-
       sortedList.add(_SortingStruct(
         store: element,
-        total: _getTotalPrice(element.items)
+        total: getTotalPrice(element.items, widget.shoppingList)
       ));
     });
 
@@ -199,96 +202,39 @@ class _CompareBodyState extends State<_CompareBody> {
   }
 }
 
-class _StoreTile extends StatefulWidget {
+class _StoreTile extends StatelessWidget {
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   final Store store;
   final ShoppingList shoppingList;
+  final double total;
 
-  _StoreTile({Key key, this.store, this.shoppingList}) : super(key: key);
-
-  @override
-  _StoreTileState createState() => _StoreTileState();
-}
-
-class _StoreTileState extends State<_StoreTile> {
-
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  _StoreTile({Key key, this.store, this.shoppingList, this.total}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
-    DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
-
-    List<String> barcodes = widget.shoppingList.barcodeList();
-
-    Stream<QuerySnapshot> storeItemStream = 
-      db.getStoreItemsStreamFromBarcodes(widget.store.id, barcodes);
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: storeItemStream,
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
-        else if (snapshot.hasData) {
-
-          widget.store.items = db.queryToStoreItemList(snapshot.data.docs);
-
-          _addStoreItemQuantity(widget.store, widget.shoppingList);
-
-          double total = _getTotalPrice(widget.store.items);
-
-          return ListTile(
-            title: Text('${widget.store.name} - ${widget.store.streetAddress}'),
-            subtitle: Text('Total Price ${total.toStringAsFixed(2)}'),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () { 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ComparisonDetails(
-                    store: widget.store,
-                    barcodes: barcodes,
-                    //storeItemsStream: storeItemStream,
-                  )
-                ),
-              );
-            },
+    return Card(
+      child: ListTile(
+        title: Text('${store.name} - ${store.streetAddress}'),
+        subtitle: Text('Total Price \$${total.toStringAsFixed(2)}'),
+        trailing: Icon(Icons.arrow_forward),
+        onTap: () { 
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ComparisonDetails(
+                store: store,
+                shoppingList: shoppingList,
+              )
+            ),
           );
-        }
-        else {
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
-        }
-      },
+        },
+      ),
     );
   }
 
-}
-
-double _getTotalPrice(List<StoreItem> storeItems) {
-
-  double total = 0;
-
-  storeItems.forEach((StoreItem storeItem) {
-    total += storeItem.price * storeItem.quantity;
-  });
-
-  return total;
-}
-
-void _addStoreItemQuantity(Store store, ShoppingList shoppingList) {
-
-  store.items.forEach((StoreItem storeItem) { 
-
-    ListItem listItem = 
-      shoppingList.items.firstWhere((element) => element.barcode == storeItem.barcode);
-    
-    storeItem.quantity = listItem.quantity;
-  });
 }
 
 class _SortingStruct {
