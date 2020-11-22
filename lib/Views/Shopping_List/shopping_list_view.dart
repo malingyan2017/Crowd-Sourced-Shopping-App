@@ -39,9 +39,15 @@ class _ShoppingListViewState extends State<ShoppingListView> {
 
           itemCount = snapshot.data.docs.length;
 
+          List<ListItem> items = db.queryToListItemList(snapshot.data.docs);
+
+          items.sort(
+            (a,b) => a.name.toLowerCase().trim().compareTo(b.name.toLowerCase().trim())
+          );
+
           bodyToReturn = itemCount == 0
-              ? _EmptyCart()
-              : _shoppingListView(itemCount, snapshot);
+            ? _EmptyCart()
+            : _shoppingListView(itemCount, items);
 
           buttonToReturn = itemCount == 0 ? null : _compareButton(context);
         } else {
@@ -59,23 +65,13 @@ class _ShoppingListViewState extends State<ShoppingListView> {
     );
   }
 
-  Widget _shoppingListView(
-      int itemCount, AsyncSnapshot<QuerySnapshot> snapshot) {
+  Widget _shoppingListView(int itemCount, List<ListItem> items) {
+
     return ListView.builder(
       itemCount: itemCount,
       itemBuilder: (BuildContext context, int index) {
-        DocumentSnapshot document = snapshot.data.docs[index];
-        Map<String, dynamic> data = document.data();
-        ListItem item = ListItem(
-            listItemId: document.id,
-            itemId: data['itemId'],
-            barcode: data['barcode'],
-            name: data['name'],
-            pictureUrl: data['image'],
-            quantity: data['quantity']);
-
         return _ListItemCard(
-          item: item,
+          item: items[index],
         );
       },
     );
@@ -230,7 +226,7 @@ class _ListItemDropDownButtonState extends State<_ListItemDropDownButton> {
           hint: Text('quantity'),
           value: quantity,
           items:
-              <int>[1, 2, 3, 4, 5, 6, 7].map<DropdownMenuItem<int>>((quantity) {
+              <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map<DropdownMenuItem<int>>((quantity) {
             return DropdownMenuItem<int>(
               child: Text(quantity.toString()),
               value: quantity,

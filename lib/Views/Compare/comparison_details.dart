@@ -130,7 +130,7 @@ class _DetailBodyState extends State<_DetailBody> {
 
     // Sorting will give the list of items a consistent appearance.
     storeItemsList.sort(
-      (a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())
+      (a,b) => a.name.toLowerCase().trim().compareTo(b.name.toLowerCase().trim())
     );
 
     List<Widget> list = [];
