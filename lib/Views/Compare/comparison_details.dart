@@ -210,7 +210,7 @@ class _StoreItemTileState extends State<_StoreItemTile> {
           ? RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.0), 
             side: BorderSide(
-              color: Theme.of(context).primaryColor,
+              color: Colors.red,
               width: 2
             )
           )
