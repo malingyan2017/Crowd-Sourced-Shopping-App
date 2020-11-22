@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_app/Util/measure.dart';
 
 // https://stackoverflow.com/questions/51901379/how-to-set-size-to-circularprogressindicator/51901451
 class CenteredLoadingCircle extends StatelessWidget {
@@ -13,8 +14,8 @@ class CenteredLoadingCircle extends StatelessWidget {
 
     return Center(
       child: SizedBox(
-        height: height,
-        width: width,
+        height: height ?? Measure.screenHeightFraction(context, .2),
+        width: width ?? Measure.screenWidthFraction(context, .4),
         child: CircularProgressIndicator()
       ),
     );

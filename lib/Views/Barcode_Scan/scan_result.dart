@@ -9,6 +9,9 @@ import 'package:shopping_app/Views/Barcode_Scan/empty_scan.dart';
 import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
 
+import 'package:shopping_app/Models/store.dart';
+import 'package:intl/intl.dart';
+
 class ScanResult extends StatefulWidget {
   final String scan_result;
   ScanResult({this.scan_result});
@@ -32,7 +35,7 @@ class _ScanResultState extends State<ScanResult> {
   }
 
   //function for add tag button, return a bottom sheet
-  void _showTagsForm(String itemId, dynamic tags, String storeId) {
+  void _showTagsForm(String itemId, dynamic tags) {
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -43,6 +46,15 @@ class _ScanResultState extends State<ScanResult> {
             ),
           );
         });
+  }
+
+  //mask the dropdown menu for user friendly purpose.
+  String yesOrNo(bool choice) {
+    if (choice) {
+      return 'Yes';
+    } else {
+      return 'No';
+    }
   }
 
   @override
@@ -62,25 +74,31 @@ class _ScanResultState extends State<ScanResult> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text("Loading");
             }
-            var data = snapshot.data;
-            String storeId = data['preferredLocation.id'];
-            String storeName = data['preferredLocation.name'];
-            String storeZipcode = data['preferredLocation.zipCode'];
+            Map<String, dynamic> data = snapshot.data.data();
+            Store preferredStore;
+            if (data['preferredLocation'] != null) {
+              preferredStore = Store.storeFromMap(data['preferredLocation']);
+            }
+
+            //String storeId;
 
             return widget.scan_result == ''
-                ? EmptyScan(
-                    storeName: storeName,
-                    storeZipcode: storeZipcode,
-                  )
+                ? preferredStore == null
+                    ? Text(
+                        'No store was chosen, click  on upper left icon to set')
+                    : EmptyScan(
+                        storeName: preferredStore.name,
+                        storeZipcode: preferredStore.zipCode,
+                      )
                 : StreamBuilder<QuerySnapshot>(
-                    stream: DatabaseService()
-                        .getStoreItemStream(storeId, widget.scan_result),
+                    stream: DatabaseService().getStoreItemStream(
+                        preferredStore.id, widget.scan_result),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Text('Loading');
                       }
                       if (snapshot.data.docs.isEmpty) {
-                        return Text('no item found for this barcode');
+                        return Text('No item found for this barcode');
                       }
                       if (snapshot.hasError) {
                         return Text('Something went wrong');
@@ -98,6 +116,14 @@ class _ScanResultState extends State<ScanResult> {
                             //stream to get storeItem's update user info
                             var userUpdateId = data['userId'];
                             var itemId = data.id;
+                            Timestamp timestamp = data['dateUpdated'];
+                            DateTime myDateTime =
+                                DateTime.parse(timestamp.toDate().toString());
+                            String formattedDateTime =
+                                DateFormat('MM-dd-yyyy').format(myDateTime);
+
+                            String salesInfo =
+                                'On Sales : ${yesOrNo(data['onSale'])}';
 
                             return StreamBuilder<DocumentSnapshot>(
                                 stream: DatabaseService(uid: userUpdateId)
@@ -168,7 +194,8 @@ class _ScanResultState extends State<ScanResult> {
                                                                     .bold),
                                                       ),
                                                       Text(
-                                                        '\$' '${data['price']}',
+                                                        '\$'
+                                                        '${data['price'].toStringAsFixed(2)}',
                                                         style: TextStyle(
                                                           color:
                                                               Colors.green[800],
@@ -178,11 +205,10 @@ class _ScanResultState extends State<ScanResult> {
                                                         ),
                                                       ),
                                                       Text(
-                                                          'update by: $userUpdateName'),
+                                                          'Update By: $userUpdateName'),
                                                       Text(
-                                                          'updated on: ${data['dateUpdated'].toDate().toString()}'),
-                                                      Text(
-                                                          'on sale: ${data['onSale']}')
+                                                          'Updated On: $formattedDateTime'),
+                                                      Text(salesInfo),
                                                     ],
                                                   ),
                                                 ],
@@ -195,7 +221,8 @@ class _ScanResultState extends State<ScanResult> {
                                                 child: Text('Update Price'),
                                                 onPressed: () =>
                                                     _showUpdateForm(
-                                                        storeId, itemId),
+                                                        preferredStore.id,
+                                                        itemId),
                                               ),
                                             ),
                                           ],
@@ -225,25 +252,23 @@ class _ScanResultState extends State<ScanResult> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    'Item tags:',
+                                                    'Popular Item Tags:',
                                                     style: TextStyle(
                                                         color: Colors.black87,
                                                         fontWeight:
                                                             FontWeight.bold),
                                                   ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      for (var item in tags)
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                      .fromLTRB(
-                                                                  0, 8, 8, 8),
-                                                          child: Text(item),
-                                                        ),
-                                                    ],
+                                                  SizedBox(
+                                                    height: 80,
+                                                    child: ListView.builder(
+                                                        shrinkWrap: true,
+                                                        itemCount: tags.length,
+                                                        itemBuilder:
+                                                            (BuildContext ctxt,
+                                                                int index) {
+                                                          return Text(
+                                                              tags[index]);
+                                                        }),
                                                   ),
                                                   SizedBox(
                                                     width: 120,
@@ -251,8 +276,8 @@ class _ScanResultState extends State<ScanResult> {
                                                       //color: Theme.of(context).accentColor,
                                                       child: Text('Add Tags'),
                                                       onPressed: () =>
-                                                          _showTagsForm(itemId,
-                                                              tags, storeId),
+                                                          _showTagsForm(
+                                                              itemId, tags),
                                                     ),
                                                   ),
                                                 ],

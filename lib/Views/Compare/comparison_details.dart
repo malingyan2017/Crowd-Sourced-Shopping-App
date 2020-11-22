@@ -5,21 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shopping_app/Components/centered_loading_circle.dart';
+import 'package:shopping_app/Components/store_total_card.dart';
 import 'package:shopping_app/Database/database.dart';
+import 'package:shopping_app/Models/shopping_list.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
 import 'package:shopping_app/Style/custom_text_style.dart';
-import 'package:shopping_app/Util/measure.dart';
+import 'package:shopping_app/Util/store_comparison_helper.dart';
 
 // This could potentially be done using all of the information collected by
 // the comparison page.  I believe the objective is for the information to update
 // along with any changes to an item's price.
 class ComparisonDetails extends StatelessWidget {
   final Store store;
-  final List<String> barcodes;
-  //final Stream<QuerySnapshot> storeItemsStream;
+  final ShoppingList shoppingList;
 
-  ComparisonDetails({Key key, this.store, this.barcodes}) : super(key: key);
+  ComparisonDetails({Key key, this.store, this.shoppingList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class ComparisonDetails extends StatelessWidget {
       ),
       body: _DetailBody(
         store: store,
-        barcodes: barcodes,
+        shoppingList: shoppingList,
       ),
     );
   }
@@ -38,10 +39,9 @@ class ComparisonDetails extends StatelessWidget {
 
 class _DetailBody extends StatefulWidget {
   final Store store;
-  final List<String> barcodes;
-  //final Stream<QuerySnapshot> storeItemsStream;
+  final ShoppingList shoppingList;
 
-  _DetailBody({Key key, this.store, this.barcodes}) : super(key: key);
+  _DetailBody({Key key, this.store, this.shoppingList}) : super(key: key);
 
   @override
   _DetailBodyState createState() => _DetailBodyState();
@@ -56,7 +56,7 @@ class _DetailBodyState extends State<_DetailBody> {
 
     return StreamBuilder<QuerySnapshot>(
       stream:
-          db.getStoreItemsStreamFromBarcodes(widget.store.id, widget.barcodes),
+          db.getStoreItemsStreamFromBarcodes(widget.store.id, widget.shoppingList.barcodeList()),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasError) {
           return Text("Something went wrong");
@@ -64,9 +64,7 @@ class _DetailBodyState extends State<_DetailBody> {
           List<StoreItem> newStoreItems =
               db.queryToStoreItemList(snapshot.data.docs);
 
-          _addStoreItemQuantity(widget.store, newStoreItems);
-
-          double total = _getTotalPrice(newStoreItems);
+          double total = getTotalPrice(newStoreItems, widget.shoppingList);
 
           // https://stackoverflow.com/questions/54152176/listview-inside-expansiontile-doesnt-work
           List<Widget> storeItemTiles = _getStoreItemTiles(newStoreItems);
@@ -76,57 +74,36 @@ class _DetailBodyState extends State<_DetailBody> {
           return Container(
             child: Column(
               children: [
-                Card(
-                  child: ListTile(
-                    title: Text(
-                        '${widget.store.name} - ${widget.store.streetAddress}'),
-                    subtitle: Text('Total Price ${total.toStringAsFixed(2)}'),
-                  ),
+                StoreTotalCard(
+                  store: widget.store,
+                  total: total,
                 ),
                 Expanded(
                   child: ListView.builder(
-                      //shrinkWrap: true,
-                      //physics: NeverScrollableScrollPhysics(),
-                      //scrollDirection: Axis.vertical,
-                      itemCount: storeItemTiles.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return storeItemTiles[index];
-                      }),
+                    itemCount: storeItemTiles.length,
+                    itemBuilder: (BuildContext context, int index) {
+
+                      return storeItemTiles[index];
+                    }
+                  ),
                 )
               ],
             ),
           );
         } else {
-          return CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
+          return CenteredLoadingCircle();
         }
       },
     );
   }
 
-  void _addStoreItemQuantity(Store store, List<StoreItem> newStoreItems) {
-    newStoreItems.forEach((StoreItem newItem) {
-      StoreItem original = store.items.firstWhere((StoreItem currentItem) {
-        return currentItem.barcode == newItem.barcode;
-      }, orElse: () => null);
-
-      newItem?.quantity = original?.quantity;
-    });
-  }
-
-  double _getTotalPrice(List<StoreItem> storeItems) {
-    double total = 0;
-
-    storeItems.forEach((StoreItem storeItem) {
-      total += storeItem.price * storeItem.quantity;
-    });
-
-    return total;
-  }
-
   List<Widget> _getStoreItemTiles(List<StoreItem> storeItemsList) {
+
+    // Sorting will give the list of items a consistent appearance.
+    storeItemsList.sort(
+      (a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())
+    );
+
     List<Widget> list = [];
 
     storeItemsList.forEach((StoreItem storeItem) {
@@ -258,14 +235,9 @@ class _StoreItemTileState extends State<_StoreItemTile> {
                     child: Text('On Sale?'),
                   ),
                   Positioned(
-                    top: 43,
-                    right: 3,
-                    child: userInfo(snapshot.data.data()),
-                  ),
-                  Positioned(
                     bottom: 1,
                     right: 3,
-                    child: locationInfo(),
+                    child: userInfo(snapshot.data.data()),
                   ),
                 ],
               ),

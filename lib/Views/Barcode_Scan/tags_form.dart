@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Database/database.dart';
@@ -18,6 +21,8 @@ class TagsForm extends StatefulWidget {
 class _TagsFormState extends State<TagsForm> {
   final _formKey = GlobalKey<FormState>();
   String _tag;
+  static const int maxLength = 10;
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
@@ -41,17 +46,25 @@ class _TagsFormState extends State<TagsForm> {
             height: 20,
           ),
           TextFormField(
+            maxLength: maxLength,
             decoration: InputDecoration(
               hintText: 'Enter new tag',
               border: OutlineInputBorder(),
             ),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+            ],
             validator: (val) {
               if (widget.tags.contains(val)) {
-                return 'tag already exists';
+                return 'Tag Already Exists';
               }
-              if (val.isEmpty) {
-                return 'please enter a tag';
+              if (val.isEmpty || val == '') {
+                return 'Please Enter a Tag';
               }
+              if (val.length > maxLength) {
+                return 'Please Only Enter $maxLength Characters';
+              }
+
               return null;
             },
             onChanged: (val) => setState(() => _tag = val),
@@ -65,10 +78,10 @@ class _TagsFormState extends State<TagsForm> {
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
                     await DatabaseService().addTag(_tag, widget.itemId);
+                    await DatabaseService(uid: user.uid)
+                        .updateRankPoints(1, user.uid);
+                    Navigator.pop(context);
                   }
-                  await DatabaseService(uid: user.uid)
-                      .updateRankPoints(1, user.uid);
-                  Navigator.pop(context);
                 }),
           ),
         ],

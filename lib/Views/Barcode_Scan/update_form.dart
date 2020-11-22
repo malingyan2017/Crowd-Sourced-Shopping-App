@@ -29,6 +29,15 @@ class _UpdateFormState extends State<UpdateForm> {
     return double.tryParse(result) != null;
   }
 
+  //mask the dropdown menu for user friendly purpose.
+  String yesOrNo(bool choice) {
+    if (choice) {
+      return 'Yes';
+    } else {
+      return 'No';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<TheUser>(context);
@@ -52,33 +61,45 @@ class _UpdateFormState extends State<UpdateForm> {
             height: 20,
           ),
           TextFormField(
-            decoration: InputDecoration(
-              hintText: 'Enter new price',
-              border: OutlineInputBorder(),
-            ),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
-            ],
-            onChanged: (val) => setState(() => _price = double.parse(val)),
-            validator: (val) =>
-                _isNumeric(val) ? null : 'please enter a number',
-          ),
+              //initialValue: '0.00',
+              decoration: InputDecoration(
+                hintText: 'Enter New Price',
+                border: OutlineInputBorder(),
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
+              ],
+              onChanged: (val) => setState(() => _price = double.parse(val)),
+              validator: (val) {
+                if (!_isNumeric(val)) {
+                  return 'Please Enter a Number';
+                } else if (val.isEmpty || val == '') {
+                  return 'Please Enter a Price';
+                }
+                return null;
+              }),
           SizedBox(
             height: 20,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: DropdownButton<bool>(
+            child: DropdownButtonFormField<bool>(
               hint: Text('On Sale?'),
               value: saleOrNot,
               items: onsales.map((choice) {
                 return DropdownMenuItem(
-                    child: Text(choice.toString()), value: choice);
+                    child: Text(yesOrNo(choice)), value: choice);
               }).toList(),
               onChanged: (value) {
                 setState(() {
                   saleOrNot = value;
                 });
+              },
+              validator: (val) {
+                if (val == null) {
+                  return 'Please Select Yes or No';
+                }
+                return null;
               },
             ),
           ),
@@ -98,11 +119,10 @@ class _UpdateFormState extends State<UpdateForm> {
                         _price,
                         saleOrNot,
                         user.uid);
+                    await DatabaseService(uid: user.uid)
+                        .updateRankPoints(1, user.uid);
+                    Navigator.pop(context);
                   }
-
-                  await DatabaseService(uid: user.uid)
-                      .updateRankPoints(1, user.uid);
-                  Navigator.pop(context);
                 }),
           )
         ],

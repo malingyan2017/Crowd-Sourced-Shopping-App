@@ -106,15 +106,15 @@ class _ScaffoldTemplate extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text(title),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.home),
-            iconSize: 32,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.home),
+        //     iconSize: 32,
+        //     onPressed: () {
+        //       Navigator.pop(context);
+        //     },
+        //   ),
+        // ],
       ),
       body: body,
       persistentFooterButtons: [button],
@@ -170,12 +170,20 @@ class _ListItemCard extends StatelessWidget {
           ),
           trailing: RaisedButton(
               child: Text('Remove'),
+
               onPressed: () async {
                 try {
+
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removing ${item.name} from your list.')
+                    )
+                  );
+
                   await db.removeShoppingListItem(item.listItemId);
                 } catch (error) {
                   Scaffold.of(context).showSnackBar(
-                      SnackBar(content: Text(itemRemovalErrorMessage)));
+                    SnackBar(content: Text(itemRemovalErrorMessage)));
                 }
               })),
     );
