@@ -207,16 +207,6 @@ class StoreReviews extends StatelessWidget {
             appBarTitle,
           ),
           centerTitle: true,
-          actions: [
-            IconButton(
-              icon: Icon(Icons.home),
-              iconSize: 32,
-              onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => BaseApp()));
-              },
-            ),
-          ],
         ),
         body:
             // Stream builder to listen to latest user reviews that have been added
