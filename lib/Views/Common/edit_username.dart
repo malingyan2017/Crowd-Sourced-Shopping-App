@@ -66,18 +66,19 @@ class _UsernameFormState extends State<_UsernameForm> {
   static const String labelText = 'New Username';
   static const String databaseErrorMessage = 
     'An error occurred while changing the username.';
+  // https://api.dart.dev/stable/2.10.2/dart-core/RegExp-class.html
+  // https://www.regular-expressions.info/shorthand.html
+  // https://stackoverflow.com/questions/52006018/regex-for-a-name-and-number-dart
+  static final RegExp whitespace = RegExp(r'\s');
+  static final RegExp alphabetical = RegExp('[a-zA-Z]');
   static const int maxLength = 16;
+  static const int minLength = 6;
 
-  bool databaseErrorOccurred = false;
-  bool usernameTaken = false;
-  bool usernameChanged = false;
   String previousUsername;
 
-  String getErrorMessage(String username) {
+  String getTakenErrorMessage(String username) {
 
-    return usernameTaken ? 
-    'The username "$username" is taken.\nPlease provide another username.'
-    : databaseErrorMessage;
+    return 'The username "$username" is taken.\nPlease provide another username.';
   }
 
   @override
@@ -112,14 +113,22 @@ class _UsernameFormState extends State<_UsernameForm> {
           labelText: labelText
         ),
         controller: usernameController,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         validator: (value) {
           if (value.isEmpty || value == '') {
             return 'Please provide a username before submitting.';
           }
-          else if (value.contains(RegExp(r'\s'))) {
-            // https://api.dart.dev/stable/2.10.2/dart-core/RegExp-class.html
-            // https://www.regular-expressions.info/shorthand.html
+          else if (value.length < minLength || value.length > maxLength) {
+
+            return 'The username must be $minLength to $maxLength characters.';
+          }
+          else if (value.contains(whitespace)) {
+            
             return 'Please provide a username without whitespace characters.';
+          }
+          else if (!value.contains(alphabetical)) {
+
+            return 'Please provide alphabetical letters.';
           }
           return null;
         },
@@ -131,9 +140,9 @@ class _UsernameFormState extends State<_UsernameForm> {
           children: [
             ElevatedButton(
               onPressed: () async {
-                usernameChanged = false;
-                databaseErrorOccurred = false;
-                usernameTaken = false;
+                Widget messageText;
+                bool databaseErrorOccurred = false;
+                bool usernameTaken = false;
                 
                 if (_formKey.currentState.validate()) {
 
@@ -142,14 +151,26 @@ class _UsernameFormState extends State<_UsernameForm> {
                     await db.updateUsername(usernameController.text)
                     .catchError( (error) {
                       databaseErrorOccurred = true;
+                      messageText = Text(databaseErrorMessage);
                     });
 
                     if (!databaseErrorOccurred) {
                       // If we make it this far then we've managed to change
                       // their username without issues      
-                      usernameChanged = true;
+                      messageText = Text(
+                        'Your username was successfully changed to "${usernameController.text}".',
+                        //style: TextStyle(color: Colors.green)
+                      );
                     }
                   }
+                  else {
+                    messageText = Text(
+                      getTakenErrorMessage(usernameController.text),
+                      //style: TextStyle(color: Colors.red)
+                    );
+                  }
+                    
+                  Scaffold.of(context).showSnackBar(SnackBar(content: messageText));
                 }
                 
                 previousUsername = usernameController.text;
@@ -161,29 +182,6 @@ class _UsernameFormState extends State<_UsernameForm> {
         ),
       )
     ];
-
-    if (databaseErrorOccurred || usernameTaken || usernameChanged) {
-      Widget messageText;
-
-      if (usernameTaken) {
-        messageText = Text(
-          getErrorMessage(previousUsername),
-          style: TextStyle(color: Colors.red)
-        );
-      }
-      else if (usernameChanged) {
-        messageText = Text(
-          'Your username was successfully changed to "$previousUsername".',
-          style: TextStyle(color: Colors.green)
-        );
-      }
-
-      Widget usernameMessage = Container(
-          child: messageText
-      );
-
-      columnChildren.add(usernameMessage);
-    }
 
     return Form(
       key: _formKey,
