@@ -11,6 +11,7 @@ import 'package:shopping_app/Models/shopping_list.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
 import 'package:shopping_app/Style/custom_text_style.dart';
+import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Util/store_comparison_helper.dart';
 
 // This could potentially be done using all of the information collected by
@@ -22,12 +23,30 @@ class ComparisonDetails extends StatelessWidget {
 
   ComparisonDetails({Key key, this.store, this.shoppingList}) : super(key: key);
 
+  // https://api.flutter.dev/flutter/material/showModalBottomSheet.html
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text('View Details'),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.info),
+        //     iconSize: 32,
+        //     onPressed: () {
+        //       showModalBottomSheet(
+        //         shape: RoundedRectangleBorder(
+        //           borderRadius: BorderRadius.all(Radius.circular(10))
+        //         ),
+        //         context: context, 
+        //         builder: (context) {
+        //           return bottomSheet(context);
+        //         }
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
       body: _DetailBody(
         store: store,
@@ -35,6 +54,16 @@ class ComparisonDetails extends StatelessWidget {
       ),
     );
   }
+
+  // Widget bottomSheet(BuildContext context) {
+  //   return Center(
+  //     heightFactor: Measure.screenHeightFraction(context, 0.2),
+  //     child: Text(
+  //       'All marked items were last updated three weeks or more from today and may no longer represent the actual price of the item listed.',
+  //       style: Theme.of(context).textTheme.bodyText1,
+  //     ),
+  //   );
+  // }
 }
 
 class _DetailBody extends StatefulWidget {
@@ -171,14 +200,27 @@ class _StoreItemTileState extends State<_StoreItemTile> {
           String formattedDateTime =
               DateFormat('MM-dd-yyyy').format(widget.storeItem.lastUpdate);
 
+          //double totalPrice = widget.storeItem.price * widget.storeItem.quantity;
           // Variables to Hold Store Item Info
           var itemName = widget.storeItem.name;
-          var itemPrice = '\$' + widget.storeItem.price.toString();
+          var itemPrice = '\$' + (widget.storeItem.price).toStringAsFixed(2) + ' [${widget.storeItem.quantity}]';
           var onSale = widget.storeItem.onSale;
 
+          ShapeBorder shape = isStale(widget.storeItem) 
+          ? RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.0), 
+            side: BorderSide(
+              color: Colors.red,
+              width: 2
+            )
+          )
+          : null;
+
+          // // https://stackoverflow.com/questions/50783354/how-to-highlight-the-border-of-a-card-selected
           return SizedBox(
             height: 90,
             child: Card(
+              shape: shape,
               child: Stack(
                 children: <Widget>[
                   Row(

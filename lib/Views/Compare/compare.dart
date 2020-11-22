@@ -179,14 +179,25 @@ class _CompareBodyState extends State<_CompareBody> {
 
       sortedList.add(_SortingStruct(
         store: element,
-        total: getTotalPrice(element.items, widget.shoppingList)
+        total: getTotalPrice(element.items, widget.shoppingList),
+        stalenessStruct: getStoreStalenessInfo(element)
       ));
     });
 
-    sortedList.sort((a, b) => a.total.compareTo(b.total));
+    sortedList.sort(
+      (a, b){
+
+        // Zero would mean the items had the same total price.
+        return a.total.compareTo(b.total) == 0
+        ? a.stalenessStruct.staleItemCount.compareTo(b.stalenessStruct.staleItemCount)
+        : 0;
+      }
+    );
 
     return sortedList;
   }
+
+
 }
 
 class _StoreTile extends StatelessWidget {
@@ -225,6 +236,7 @@ class _SortingStruct {
 
   Store store;
   double total;
+  StalenessStruct stalenessStruct;
 
-  _SortingStruct({this.store, this.total});
+  _SortingStruct({this.store, this.total, this.stalenessStruct});
 }
