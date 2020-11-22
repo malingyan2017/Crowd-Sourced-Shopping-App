@@ -49,7 +49,8 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
           child: Text('Add to List'),
           textColor: Colors.black,
           onPressed: () async {
-            var result = true;
+            var result = await DatabaseService(uid: user.uid)
+                .validateQuantity(widget.data['barcode'], quantity);
             if (result == true) {
               await DatabaseService(uid: user.uid).addToCart(
                 widget.docId,

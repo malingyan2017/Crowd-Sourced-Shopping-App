@@ -111,6 +111,37 @@ class DatabaseService {
     });
   }
 
+  //validate quantity to be within 10
+  Future<dynamic> validateQuantity(String barcode, int quantity) async {
+    QuerySnapshot result = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .where('barcode', isEqualTo: barcode)
+        .limit(1)
+        .get();
+    if (result.size == 0 && quantity <= 10) {
+      return true;
+    } else {
+      var doc = result.docs[0];
+      String id = doc.id;
+
+      var data = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('shoppingList')
+          .doc(id);
+      int currentQ;
+      //get current quantity for that item
+      await data.get().then((doc) => currentQ = doc.data()['quantity']);
+
+      if (currentQ + quantity <= 10) {
+        return true;
+      }
+      return false;
+    }
+  }
+
   //add to cart function by lingyan
   Future addToCart(String itemId, String name, String image, int quantity,
       String barcode) async {
