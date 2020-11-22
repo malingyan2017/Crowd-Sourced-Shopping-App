@@ -449,14 +449,41 @@ class DatabaseService {
       .get();
   }
 
-  Stream<QuerySnapshot> getStoreItemsStreamFromBarcodes(String storeId, List<String> barcodes) {
+  Stream<QuerySnapshot> getStoreItemStreamFromBarcode(String storeId, String barcode) {
 
     return storeCollection
       .doc(storeId)
       .collection(DatabaseConstants.storeItems)
-      .where('barcode', whereIn: barcodes)
-      .orderBy('name')
+      .where('barcode', isEqualTo: barcode)
       .snapshots();
+  }
+
+  Stream getStoreItemsListStreamFromBarcodes(String storeId, List<String> barcodes) {
+
+    List<Stream> listOfStreams = [];
+
+    barcodes.forEach((String currentBarcode) { 
+      listOfStreams.add(getStoreItemStreamFromBarcode(storeId, currentBarcode));
+    });
+
+    // https://pub.dev/documentation/rxdart/latest/rx/CombineLatestStream-class.html
+    // https://stackoverflow.com/questions/51880330/flutter-stream-two-streams-into-a-single-screen
+    return CombineLatestStream(
+      listOfStreams, 
+      (values) {
+        return values.map<StoreItem>((snapshot) {
+          return snapshotToStoreItem(snapshot.docs[0]);
+        }).toList();
+      }
+      
+    );
+
+    // return storeCollection
+    //   .doc(storeId)
+    //   .collection(DatabaseConstants.storeItems)
+    //   .where('barcode', whereIn: barcodes)
+    //   .orderBy('name')
+    //   .snapshots();
   }
 
   Future<QuerySnapshot> getStoreItemsQueryFromBarcodes(String storeId, List<String> barcodes) {
@@ -469,12 +496,19 @@ class DatabaseService {
       .get();
   }
 
+  // Returns a stream that contains a list of store objects with filled in lists
+  // of their store items.
   Stream getStoresWithStoreItems(List<Store> stores, List<String> barcodes) {
 
     List<Stream> listOfStreams = [];
 
     stores.forEach((Store currentStore) { 
-      listOfStreams.add(getStoreItemsStreamFromBarcodes(currentStore.id, barcodes));
+
+      barcodes.forEach((String currentBarcode) { 
+        listOfStreams.add(getStoreItemStreamFromBarcode(currentStore.id, currentBarcode));
+      });
+
+      //listOfStreams.add(getStoreItemsListStreamFromBarcodes(currentStore.id, barcodes));
     });
 
     // https://pub.dev/documentation/rxdart/latest/rx/CombineLatestStream-class.html
@@ -482,26 +516,70 @@ class DatabaseService {
     return CombineLatestStream(
       listOfStreams, 
       (values) {
+
+        int limit = barcodes.length;
+
+        int counter = 0;
+
+        int storeCounter = 0;
+        
+        List<List<StoreItem>> storeItems = List<List<StoreItem>>.generate(stores.length, (index) => []);
+
+        values.forEach((snapshot) { 
+
+          storeItems[storeCounter].add(snapshotToStoreItem(snapshot.docs[0]));
+
+          if (counter >= limit - 1) {
+            storeCounter++;
+            counter = 0;
+          }
+          else {
+            counter++;
+          }
+          
+        });
+
+        List<Store> storesToReturn = [];
+
         int i = 0;
 
-        return values.map<Store>((snapshot) {
-
-          Store oldStore = stores[i];
+        stores.forEach((Store store) {
 
           Store newStore = Store(
-            id: oldStore.id,
-            name: oldStore.name,
-            streetAddress: oldStore.streetAddress,
-            city: oldStore.city,
-            state: oldStore.state,
-            zipCode: oldStore.zipCode,
-            items: queryToStoreItemList(snapshot.docs)
+            id: store.id,
+            name: store.name,
+            streetAddress: store.streetAddress,
+            city: store.city,
+            state: store.state,
+            zipCode: store.zipCode,
+            items: storeItems[i]
           );
 
           i++;
+           
+          storesToReturn.add(newStore);
+        });
 
-          return newStore;
-        }).toList();
+        return storesToReturn;
+
+        // return values.map<Store>((snapshot) {
+
+        //   Store oldStore = stores[i];
+
+        //   Store newStore = Store(
+        //     id: oldStore.id,
+        //     name: oldStore.name,
+        //     streetAddress: oldStore.streetAddress,
+        //     city: oldStore.city,
+        //     state: oldStore.state,
+        //     zipCode: oldStore.zipCode,
+        //     items: snapshot
+        //   );
+
+        //   i++;
+
+        //   return newStore;
+        // }).toList();
       }
     );
   }
@@ -509,9 +587,15 @@ class DatabaseService {
   // Converts a list of queries into a list of storeItem objects.
   List<StoreItem> queryToStoreItemList(List<QueryDocumentSnapshot> queryList) {
 
-
     return queryList.map((QueryDocumentSnapshot snapshot) {
-      Map<String, dynamic> storeItem = snapshot.data();
+
+      return snapshotToStoreItem(snapshot);
+    }).toList();
+  }
+
+  StoreItem snapshotToStoreItem(QueryDocumentSnapshot snapshot) {
+
+    Map<String, dynamic> storeItem = snapshot.data();
 
       return StoreItem(
         storeItemId: snapshot.id,
@@ -524,7 +608,6 @@ class DatabaseService {
         lastUserId: storeItem['userId'],
         lastUpdate: storeItem['dateUpdated'].toDate()
       );
-    }).toList();
   }
 
   // Get the most current shopping list as a shopping list object

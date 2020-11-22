@@ -54,15 +54,15 @@ class _DetailBodyState extends State<_DetailBody> {
   Widget build(BuildContext context) {
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
 
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder(
       stream:
-          db.getStoreItemsStreamFromBarcodes(widget.store.id, widget.shoppingList.barcodeList()),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          db.getStoreItemsListStreamFromBarcodes(widget.store.id, widget.shoppingList.barcodeList()),
+      builder: (BuildContext context, snapshot) {
         if (snapshot.hasError) {
           return Text("Something went wrong");
         } else if (snapshot.hasData) {
-          List<StoreItem> newStoreItems =
-              db.queryToStoreItemList(snapshot.data.docs);
+          List<StoreItem> newStoreItems = snapshot.data;
+              //db.queryToStoreItemList(snapshot.data.docs);
 
           double total = getTotalPrice(newStoreItems, widget.shoppingList);
 
