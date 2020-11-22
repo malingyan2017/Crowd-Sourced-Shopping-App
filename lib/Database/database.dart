@@ -111,6 +111,37 @@ class DatabaseService {
     });
   }
 
+  // validate quantity to be with 10 in shopping cart
+  Future<dynamic> validateQuantity(String barcode, int quantity) async {
+    QuerySnapshot result = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .where('barcode', isEqualTo: barcode)
+        .limit(1)
+        .get();
+    if (result.size == 0 && quantity <= 10) {
+      return true;
+    } else {
+      var doc = result.docs[0];
+      String id = doc.id;
+
+      var data = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('shoppingList')
+          .doc(id);
+      int currentQ;
+      //get current quantity for that item
+      await data.get().then((doc) => currentQ = doc.data()['quantity']);
+
+      if (currentQ + quantity <= 10) {
+        return true;
+      }
+      return false;
+    }
+  }
+
   //add to cart function by lingyan
   Future addToCart(String itemId, String name, String image, int quantity,
       String barcode) async {
@@ -208,7 +239,6 @@ class DatabaseService {
   }
 
   Stream<DocumentSnapshot> getUserStream(String userId) {
-
     return userCollection.doc(userId).snapshots();
   }
 
@@ -436,122 +466,105 @@ class DatabaseService {
   }
 
   Stream<QuerySnapshot> getStoresStreamFromZipCode(String zipCode) {
-
-    return storeCollection
-      .where('zipCode', isEqualTo: zipCode)
-      .snapshots();
+    return storeCollection.where('zipCode', isEqualTo: zipCode).snapshots();
   }
 
   Future<QuerySnapshot> getStoreQueryFromZipcode(String zipCode) {
-
-    return storeCollection
-      .where('zipCode', isEqualTo: zipCode)
-      .get();
+    return storeCollection.where('zipCode', isEqualTo: zipCode).get();
   }
 
-  Stream<QuerySnapshot> getStoreItemsStreamFromBarcodes(String storeId, List<String> barcodes) {
-
+  Stream<QuerySnapshot> getStoreItemsStreamFromBarcodes(
+      String storeId, List<String> barcodes) {
     return storeCollection
-      .doc(storeId)
-      .collection(DatabaseConstants.storeItems)
-      .where('barcode', whereIn: barcodes)
-      .orderBy('name')
-      .snapshots();
+        .doc(storeId)
+        .collection(DatabaseConstants.storeItems)
+        .where('barcode', whereIn: barcodes)
+        .orderBy('name')
+        .snapshots();
   }
 
-  Future<QuerySnapshot> getStoreItemsQueryFromBarcodes(String storeId, List<String> barcodes) {
-
+  Future<QuerySnapshot> getStoreItemsQueryFromBarcodes(
+      String storeId, List<String> barcodes) {
     return storeCollection
-      .doc(storeId)
-      .collection(DatabaseConstants.storeItems)
-      .where('barcode', whereIn: barcodes)
-      .orderBy('name')
-      .get();
+        .doc(storeId)
+        .collection(DatabaseConstants.storeItems)
+        .where('barcode', whereIn: barcodes)
+        .orderBy('name')
+        .get();
   }
 
   Stream getStoresWithStoreItems(List<Store> stores, List<String> barcodes) {
-
     List<Stream> listOfStreams = [];
 
-    stores.forEach((Store currentStore) { 
-      listOfStreams.add(getStoreItemsStreamFromBarcodes(currentStore.id, barcodes));
+    stores.forEach((Store currentStore) {
+      listOfStreams
+          .add(getStoreItemsStreamFromBarcodes(currentStore.id, barcodes));
     });
 
     // https://pub.dev/documentation/rxdart/latest/rx/CombineLatestStream-class.html
     // https://stackoverflow.com/questions/51880330/flutter-stream-two-streams-into-a-single-screen
-    return CombineLatestStream(
-      listOfStreams, 
-      (values) {
-        int i = 0;
+    return CombineLatestStream(listOfStreams, (values) {
+      int i = 0;
 
-        return values.map<Store>((snapshot) {
+      return values.map<Store>((snapshot) {
+        Store oldStore = stores[i];
 
-          Store oldStore = stores[i];
-
-          Store newStore = Store(
+        Store newStore = Store(
             id: oldStore.id,
             name: oldStore.name,
             streetAddress: oldStore.streetAddress,
             city: oldStore.city,
             state: oldStore.state,
             zipCode: oldStore.zipCode,
-            items: queryToStoreItemList(snapshot.docs)
-          );
+            items: queryToStoreItemList(snapshot.docs));
 
-          i++;
+        i++;
 
-          return newStore;
-        }).toList();
-      }
-    );
+        return newStore;
+      }).toList();
+    });
   }
 
   // Converts a list of queries into a list of storeItem objects.
   List<StoreItem> queryToStoreItemList(List<QueryDocumentSnapshot> queryList) {
-
-
     return queryList.map((QueryDocumentSnapshot snapshot) {
       Map<String, dynamic> storeItem = snapshot.data();
 
       return StoreItem(
-        storeItemId: snapshot.id,
-        itemId: storeItem['itemId'],
-        name: storeItem['name'],
-        barcode: storeItem['barcode'],
-        onSale: storeItem['onSale'],
-        pictureUrl: storeItem['pictureUrl'],
-        price: storeItem['price'],
-        lastUserId: storeItem['userId'],
-        lastUpdate: storeItem['dateUpdated'].toDate()
-      );
+          storeItemId: snapshot.id,
+          itemId: storeItem['itemId'],
+          name: storeItem['name'],
+          barcode: storeItem['barcode'],
+          onSale: storeItem['onSale'],
+          pictureUrl: storeItem['pictureUrl'],
+          price: storeItem['price'],
+          lastUserId: storeItem['userId'],
+          lastUpdate: storeItem['dateUpdated'].toDate());
     }).toList();
   }
 
   // Get the most current shopping list as a shopping list object
   Future<ShoppingList> getCurrentShoppingList() async {
-
     QuerySnapshot querySnapshot = await userCollection
-      .doc(uid)
-      .collection(DatabaseConstants.shoppingList)
-      .get();
-    
+        .doc(uid)
+        .collection(DatabaseConstants.shoppingList)
+        .get();
+
     return ShoppingList(items: queryToListItemList(querySnapshot.docs));
   }
 
   // Converts a list of queries into a list of listItem objects.
   List<ListItem> queryToListItemList(List<QueryDocumentSnapshot> queryList) {
-
     return queryList.map((QueryDocumentSnapshot snapshot) {
       Map<String, dynamic> storeItem = snapshot.data();
 
       return ListItem(
-        listItemId: snapshot.id,
-        itemId: storeItem['itemId'],
-        name: storeItem['name'],
-        barcode: storeItem['barcode'],
-        pictureUrl: storeItem['image'],
-        quantity: storeItem['quantity']
-      );
+          listItemId: snapshot.id,
+          itemId: storeItem['itemId'],
+          name: storeItem['name'],
+          barcode: storeItem['barcode'],
+          pictureUrl: storeItem['image'],
+          quantity: storeItem['quantity']);
     }).toList();
   }
 
