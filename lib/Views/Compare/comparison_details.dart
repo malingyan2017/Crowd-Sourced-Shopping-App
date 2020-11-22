@@ -171,9 +171,10 @@ class _StoreItemTileState extends State<_StoreItemTile> {
           String formattedDateTime =
               DateFormat('MM-dd-yyyy').format(widget.storeItem.lastUpdate);
 
+          //double totalPrice = widget.storeItem.price * widget.storeItem.quantity;
           // Variables to Hold Store Item Info
           var itemName = widget.storeItem.name;
-          var itemPrice = '\$' + widget.storeItem.price.toStringAsFixed(2);
+          var itemPrice = '\$' + (widget.storeItem.price).toStringAsFixed(2) + ' [${widget.storeItem.quantity}]';
           var onSale = widget.storeItem.onSale;
 
           return SizedBox(
