@@ -28,16 +28,6 @@ class EditReview extends StatelessWidget {
           appBarTitle,
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.home),
-            iconSize: 32,
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => BaseApp()));
-            },
-          ),
-        ],
       ),
       body: Stack(
         children: <Widget>[

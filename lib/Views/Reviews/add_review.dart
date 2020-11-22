@@ -26,16 +26,6 @@ class AddReview extends StatelessWidget {
           appBarTitle,
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.home),
-            iconSize: 32,
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => BaseApp()));
-            },
-          ),
-        ],
       ),
       body: Stack(
         children: <Widget>[
@@ -155,15 +145,32 @@ class MyCustomFormState extends State<MyCustomForm> {
               return null;
             },
           ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
-            child: RaisedButton(
-              color:
-                  _buttonEnabled ? Theme.of(context).buttonColor : Colors.grey,
-              onPressed: _buttonEnabled ? () => validateForm() : null,
-              child: Text('Submit'),
-            ),
+          Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 10.0),
+                child: RaisedButton(
+                  color: _buttonEnabled
+                      ? Theme.of(context).buttonColor
+                      : Colors.grey,
+                  onPressed: _buttonEnabled ? () => validateForm() : null,
+                  child: Text('Submit'),
+                ),
+              ),
+              Tooltip(
+                message:
+                    'In order to enable the submit button, you must select a rating.',
+                height: 75,
+                margin: EdgeInsets.all(15.0),
+                child: IconButton(
+                  icon: Icon(Icons.help),
+                  iconSize: 25,
+                  color: Colors.black54,
+                  onPressed: () {},
+                ),
+              ),
+            ],
           ),
         ],
       ),
