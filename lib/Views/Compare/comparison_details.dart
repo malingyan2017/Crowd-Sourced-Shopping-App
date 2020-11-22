@@ -173,7 +173,7 @@ class _StoreItemTileState extends State<_StoreItemTile> {
 
           // Variables to Hold Store Item Info
           var itemName = widget.storeItem.name;
-          var itemPrice = '\$' + widget.storeItem.price.toString();
+          var itemPrice = '\$' + widget.storeItem.price.toStringAsFixed(2);
           var onSale = widget.storeItem.onSale;
 
           return SizedBox(
