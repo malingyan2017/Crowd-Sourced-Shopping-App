@@ -32,8 +32,8 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
               quantity = value;
             });
           },
-          items:
-              <int>[1, 2, 3, 4, 5, 6, 7].map<DropdownMenuItem<int>>((quantity) {
+          items: <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              .map<DropdownMenuItem<int>>((quantity) {
             return DropdownMenuItem<int>(
               child: Text(quantity.toString()),
               value: quantity,
@@ -49,16 +49,26 @@ class _MyDropDownButtonState extends State<MyDropDownButton> {
           child: Text('Add to List'),
           textColor: Colors.black,
           onPressed: () async {
-            await DatabaseService(uid: user.uid).addToCart(
-              widget.docId,
-              widget.data['name'],
-              widget.data['pictureUrl'],
-              quantity,
-              widget.data['barcode'],
-            );
-            Scaffold.of(context).showSnackBar(SnackBar(
-              content: Text('An Item Has Been Added.'),
-            ));
+            var result = true;
+            if (result == true) {
+              await DatabaseService(uid: user.uid).addToCart(
+                widget.docId,
+                widget.data['name'],
+                widget.data['pictureUrl'],
+                quantity,
+                widget.data['barcode'],
+              );
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('Item(s) Has Been Added.'),
+              ));
+            } else {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text(
+                  'Maxium Quantity is 10 for Each Item',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ));
+            }
           },
         ),
         //),
