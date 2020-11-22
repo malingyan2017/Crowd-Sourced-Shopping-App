@@ -12,4 +12,13 @@ class CustomTextStyle {
     fontWeight: FontWeight.bold,
     fontSize: 18,
   );
+
+  static TextStyle getDetailedItemPriceStyle(BuildContext context) {
+
+    return TextStyle(
+      color: Theme.of(context).primaryColor,
+      fontWeight: FontWeight.bold,
+      fontSize: 18,
+    );
+  }
 }
