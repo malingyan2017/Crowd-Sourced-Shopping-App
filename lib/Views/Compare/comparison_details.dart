@@ -159,7 +159,7 @@ class _StoreItemTileState extends State<_StoreItemTile> {
     }
 
     return StreamBuilder<DocumentSnapshot>(
-      stream: db.getUserStream(auth.currentUser.uid),
+      stream: db.getUserStream(widget.storeItem.lastUserId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text("Something went wrong");
