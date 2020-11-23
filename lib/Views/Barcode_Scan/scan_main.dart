@@ -97,9 +97,11 @@ class _BarcodeScanState extends State<BarcodeScan> {
               ),
               SizedBox(height: 20),
               Text(maskResult(scanResult)),
-              ScanResult(
-                scan_result: scanResult,
-                preferredStore: preferredStore,
+              Expanded(
+                child: ScanResult(
+                  scan_result: scanResult,
+                  preferredStore: preferredStore,
+                ),
               ),
             ],
           );
