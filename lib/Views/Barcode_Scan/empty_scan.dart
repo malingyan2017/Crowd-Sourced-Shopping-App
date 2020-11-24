@@ -24,7 +24,10 @@ class _EmptyScanState extends State<EmptyScan> {
         SizedBox(
           height: 20,
         ),
-        Text('To change location, please navigate to upper left icon'),
+        Text(
+          'To change location, please navigate to upper left icon',
+          style: TextStyle(color: Colors.blue),
+        ),
       ],
     );
   }

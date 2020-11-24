@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Views/Barcode_Scan/scan_result.dart';
 import 'package:shopping_app/Views/Barcode_Scan/tags_form.dart';
 import 'package:shopping_app/Views/Barcode_Scan/update_form.dart';
+import 'package:shopping_app/Models/store.dart';
 
 //source:  https://pub.dev/packages/flutter_barcode_scanner/example
 //https://www.youtube.com/watch?v=4QpzUDc-c7A&list=PL4cUxeGkcC9j--TKIdkb3ISfRbJeJYQwC&index=21&ab_channel=TheNetNinja
@@ -51,30 +52,59 @@ class _BarcodeScanState extends State<BarcodeScan> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<QuerySnapshot>.value(
-      value: DatabaseService().items,
-      child: Column(
-        children: [
-          SizedBox(height: 20),
-          FlatButton(
-            onPressed: () => scanBarcode(),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.camera_alt,
-                  size: 60,
+    final user = Provider.of<TheUser>(context);
+    return StreamBuilder<DocumentSnapshot>(
+        stream: DatabaseService(uid: user.uid).getCurrentUserStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text("Loading");
+          }
+          Map<String, dynamic> data = snapshot.data.data();
+          Store preferredStore;
+          if (data['preferredLocation'] != null) {
+            preferredStore = Store.storeFromMap(data['preferredLocation']);
+          }
+
+          return Column(
+            children: <Widget>[
+              SizedBox(height: 20),
+              FlatButton(
+                onPressed: () {
+                  if (preferredStore == null) {
+                    Scaffold.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                        'Please Choose Your Location First',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ));
+                  } else {
+                    scanBarcode();
+                  }
+                },
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.camera_alt,
+                      size: 60,
+                    ),
+                    Text('Scan to Update Item'),
+                  ],
                 ),
-                Text('Scan to Update Item'),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(maskResult(scanResult)),
-          ScanResult(
-            scan_result: scanResult,
-          ),
-        ],
-      ),
-    );
+              ),
+              SizedBox(height: 20),
+              Text(maskResult(scanResult)),
+              Expanded(
+                child: ScanResult(
+                  scan_result: scanResult,
+                  preferredStore: preferredStore,
+                ),
+              ),
+            ],
+          );
+        });
   }
 }
