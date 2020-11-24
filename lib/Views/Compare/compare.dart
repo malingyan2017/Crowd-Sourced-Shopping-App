@@ -187,10 +187,12 @@ class _CompareBodyState extends State<_CompareBody> {
     sortedList.sort(
       (a, b){
 
+        int result = a.total.compareTo(b.total);
+
         // Zero would mean the items had the same total price.
-        return a.total.compareTo(b.total) == 0
+        return result == 0
         ? a.stalenessStruct.staleItemCount.compareTo(b.stalenessStruct.staleItemCount)
-        : 0;
+        : result;
       }
     );
 

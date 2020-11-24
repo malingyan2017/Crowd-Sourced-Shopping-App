@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shopping_app/Components/centered_loading_circle.dart';
+import 'package:shopping_app/Components/help_icon.dart';
 import 'package:shopping_app/Components/store_total_card.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/shopping_list.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
 import 'package:shopping_app/Style/custom_text_style.dart';
-import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Util/store_comparison_helper.dart';
 
 // This could potentially be done using all of the information collected by
@@ -20,6 +20,8 @@ import 'package:shopping_app/Util/store_comparison_helper.dart';
 class ComparisonDetails extends StatelessWidget {
   final Store store;
   final ShoppingList shoppingList;
+  final String helpMessage = 
+    'All marked items were last updated three weeks or more from today and may no longer represent the actual price of the item listed.';
 
   ComparisonDetails({Key key, this.store, this.shoppingList}) : super(key: key);
 
@@ -30,23 +32,12 @@ class ComparisonDetails extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text('View Details'),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.info),
-        //     iconSize: 32,
-        //     onPressed: () {
-        //       showModalBottomSheet(
-        //         shape: RoundedRectangleBorder(
-        //           borderRadius: BorderRadius.all(Radius.circular(10))
-        //         ),
-        //         context: context, 
-        //         builder: (context) {
-        //           return bottomSheet(context);
-        //         }
-        //       );
-        //     },
-        //   ),
-        // ],
+        actions: [
+          HelpIcon(
+            message: helpMessage,
+            secondsToShow: 5,
+          )
+        ]
       ),
       body: _DetailBody(
         store: store,
