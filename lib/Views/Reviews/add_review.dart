@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Models/review.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shopping_app/Views/Common/base_app.dart';
 import "dart:async";
 
@@ -64,6 +65,7 @@ class MyCustomFormState extends State<MyCustomForm> {
   void validateForm() {
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
     String myCurrentUserId = auth.currentUser.uid;
+
     print('add rev user: $myCurrentUserId');
     if (_formKey.currentState.validate()) {
       Review reviewData = Review(
