@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopping_app/Database/database.dart';
 import 'package:shopping_app/Models/the_user.dart';
+import 'dart:math';
 
 //borrow the concept of structure and part of code from the below tutorial of firebase
 //https://github.com/iamshaunjp/flutter-firebase/blob/lesson-9/brew_crew/lib/screens/home/home.dart
@@ -44,9 +45,14 @@ class AuthService {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User user = result.user;
-
+      final _random = new Random();
+      int min = 1;
+      int max = 1000000;
+      int r = min + _random.nextInt(max - min);
+      String number = r.toString();
+      String member = 'member' + number;
       //create user data in data base with its uid when he register
-      await DatabaseService(uid: user.uid).updateUsers('new member', 0);
+      await DatabaseService(uid: user.uid).updateUsers(member, 0);
       return _userFromUser(user);
     } catch (e) {
       print(e.toString());
