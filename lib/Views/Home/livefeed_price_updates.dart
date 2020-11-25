@@ -135,7 +135,7 @@ class LivePriceUpdates extends StatelessWidget {
 
                 // Variables to Hold Store Item Info
                 var itemName = data['name'];
-                var itemPrice = '\$' + data['price'].toString();
+                var itemPrice = '\$' + data['price'].toStringAsFixed(2);
                 var onSale = data['onSale'];
                 var userId = data['userId'];
 
