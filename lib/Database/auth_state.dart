@@ -45,6 +45,8 @@ class AuthService {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User user = result.user;
+
+      //create random number string to use as default username
       final _random = new Random();
       int min = 1;
       int max = 1000000;
