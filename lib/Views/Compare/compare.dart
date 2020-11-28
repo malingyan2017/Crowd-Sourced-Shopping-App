@@ -69,7 +69,7 @@ class _CompareState extends State<Compare> {
           else if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
 
             return _CompareBody(
-              user: _createUserFromSnapshot(snapshot),
+              user: db.createUserFromSnapshot(snapshot),
               shoppingList: shoppingList,
             );
           }
@@ -81,24 +81,7 @@ class _CompareState extends State<Compare> {
     );
   }
 
-  TheUser _createUserFromSnapshot(AsyncSnapshot<DocumentSnapshot> snapshot) {
 
-    Map<String, dynamic> data = snapshot.data.data();
-
-    return TheUser(
-      uid: snapshot.data.id,
-      username: data['username'],
-      rankPoints: data['rankPoints'],
-      preferredStore: Store(
-        id: data['preferredLocation']['id'],
-        name: data['preferredLocation']['name'],
-        streetAddress: data['preferredLocation']['streetAddress'],
-        city: data['preferredLocation']['city'],
-        state: data['preferredLocation']['state'],
-        zipCode: data['preferredLocation']['zipCode']
-      )
-    );
-  }
 }
 
 class _CompareBody extends StatefulWidget {

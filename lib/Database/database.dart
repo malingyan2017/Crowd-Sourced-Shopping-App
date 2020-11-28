@@ -8,6 +8,7 @@ import 'package:shopping_app/Models/review.dart';
 import 'package:shopping_app/Models/shopping_list.dart';
 import 'package:shopping_app/Models/store.dart';
 import 'package:shopping_app/Models/store_item.dart';
+import 'package:shopping_app/Models/the_user.dart';
 
 // Class to store information to be used across various pages/widgets in the Reviews features
 class StoreData {
@@ -640,6 +641,28 @@ class DatabaseService {
           pictureUrl: storeItem['image'],
           quantity: storeItem['quantity']);
     }).toList();
+  }
+
+  // Creates a TheUser object from database snapshot data.
+  TheUser createUserFromSnapshot(AsyncSnapshot<DocumentSnapshot> snapshot) {
+
+    Map<String, dynamic> data = snapshot.data.data();
+
+    return TheUser(
+      uid: snapshot.data.id,
+      username: data['username'],
+      rankPoints: data['rankPoints'],
+      preferredStore: data['preferredLocation'] == null
+      ? null
+      : Store(
+        id: data['preferredLocation']['id'],
+        name: data['preferredLocation']['name'],
+        streetAddress: data['preferredLocation']['streetAddress'],
+        city: data['preferredLocation']['city'],
+        state: data['preferredLocation']['state'],
+        zipCode: data['preferredLocation']['zipCode']
+      )
+    );
   }
 
   /*// Creates a set of store items inside of every store.

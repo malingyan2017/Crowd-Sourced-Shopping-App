@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app/Components/centered_loading_circle.dart';
@@ -25,43 +26,22 @@ class _ShoppingListViewState extends State<ShoppingListView> {
     final user = Provider.of<TheUser>(context);
     DatabaseService db = DatabaseService(uid: user.uid);
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: db.getShoppingListStream(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        Widget bodyToReturn;
-        Widget buttonToReturn;
+    return StreamBuilder(
+      stream: db.getCurrentUserStream(),
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
 
         if (snapshot.hasError) {
-          bodyToReturn = Text("Something went wrong");
+          return _ErrorScaffoldTemplate(body: Text("Something went wrong"),);
           // return _ScaffoldTemplate(body: Text("Something went wrong"));
         } else if (snapshot.hasData) {
-          //Map<String, dynamic> data = snapshot.data.data();
 
-          itemCount = snapshot.data.docs.length;
+          TheUser user = db.createUserFromSnapshot(snapshot);
+          return _buildPage(context, user);
 
-          List<ListItem> items = db.queryToListItemList(snapshot.data.docs);
-
-          items.sort(
-            (a,b) => a.name.toLowerCase().trim().compareTo(b.name.toLowerCase().trim())
-          );
-
-          bodyToReturn = itemCount == 0
-            ? _EmptyCart()
-            : _shoppingListView(itemCount, items);
-
-          buttonToReturn = itemCount == 0 ? null : _compareButton(context);
         } else {
-          bodyToReturn = CenteredLoadingCircle(
-            height: Measure.screenHeightFraction(context, .2),
-            width: Measure.screenWidthFraction(context, .4),
-          );
+          return _ErrorScaffoldTemplate(body: CenteredLoadingCircle(),);
         }
-
-        return _ScaffoldTemplate(
-          body: bodyToReturn,
-          button: buttonToReturn,
-        );
-      },
+      }
     );
   }
 
@@ -77,43 +57,120 @@ class _ShoppingListViewState extends State<ShoppingListView> {
     );
   }
 
-  Widget _compareButton(BuildContext context) {
-    return ElevatedButton(
-      child: Text('Compare'),
-      onPressed: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Compare()));
+  Widget _buildPage(BuildContext context, TheUser user) {
+
+    DatabaseService db = DatabaseService(uid: user.uid);
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: db.getShoppingListStream(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        Widget bodyToReturn;
+
+        if (snapshot.hasError) {
+          return _ErrorScaffoldTemplate(body: Text("Something went wrong"));
+          
+        } else if (snapshot.hasData) {
+          //Map<String, dynamic> data = snapshot.data.data();
+
+          itemCount = snapshot.data.docs.length;
+
+          List<ListItem> items = db.queryToListItemList(snapshot.data.docs);
+
+          items.sort(
+            (a,b) => a.name.toLowerCase().trim().compareTo(b.name.toLowerCase().trim())
+          );
+
+          bodyToReturn = itemCount == 0
+            ? _EmptyCart()
+            : _shoppingListView(itemCount, items);
+
+          return _ScaffoldTemplate(
+            user: user,
+            itemCount: itemCount,
+            body: bodyToReturn,
+          );
+
+        } else {
+          return _ErrorScaffoldTemplate(body: CenteredLoadingCircle(),);
+        }
       },
+    );
+  }
+
+  
+}
+
+class _ErrorScaffoldTemplate extends StatelessWidget {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  static const String title = 'Shopping List';
+
+  final Widget body;
+
+  _ErrorScaffoldTemplate({Key key, this.body}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(title),
+      ),
+      body: body,
     );
   }
 }
 
 class _ScaffoldTemplate extends StatelessWidget {
+  final FirebaseAuth auth = FirebaseAuth.instance;
   static const String title = 'Shopping List';
 
+  final TheUser user;
+  final int itemCount;
   final Widget body;
-  final Widget button;
 
-  _ScaffoldTemplate({Key key, this.body, this.button}) : super(key: key);
+  _ScaffoldTemplate({Key key, this.user, this.itemCount, this.body}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(title),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.home),
-        //     iconSize: 32,
-        //     onPressed: () {
-        //       Navigator.pop(context);
-        //     },
-        //   ),
-        // ],
       ),
       body: body,
-      persistentFooterButtons: [button],
+      persistentFooterButtons: [Builder(
+        builder: (BuildContext context) {
+          return _compareButton(context, user);
+        } 
+      )],
+    );
+  }
+
+  Widget _compareButton(BuildContext context, TheUser user) {
+
+    return ElevatedButton(
+      child: Text('Compare'),
+      onPressed: itemCount == 0 
+      ? null
+      : () {
+        if (user.preferredStore != null) {
+          Navigator.push(
+            context, 
+            MaterialPageRoute(
+              builder: (context) => Compare()
+            )
+          );
+        }
+        else {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Please select a location before attempting to compare.')
+            )
+          );
+        }
+      },
     );
   }
 }
