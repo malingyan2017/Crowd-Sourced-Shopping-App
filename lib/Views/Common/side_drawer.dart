@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_app/Database/database.dart';
-import 'package:shopping_app/Models/store.dart';
+import 'package:shopping_app/Models/the_user.dart';
 import 'package:shopping_app/Util/measure.dart';
 import 'package:shopping_app/Views/Common/edit_location.dart';
 import 'package:shopping_app/Views/Common/edit_username.dart';
@@ -11,76 +11,89 @@ class SideDrawer extends StatelessWidget {
   final AuthService _auth = AuthService();
   final FirebaseAuth auth = FirebaseAuth.instance;
 
+  static const String noPreferredStore = 'A store has not been selected.';
+
   @override
   Widget build(BuildContext context) {
-    const String noPreferredStore = 'A store has not been selected.';
-    //CollectionReference myUser = FirebaseFirestore.instance.collection('users');
+    
     DatabaseService db = DatabaseService(uid: auth.currentUser.uid);
-    Store preferredStore;
 
-    final TextStyle userInfoStyle = TextStyle(
-      color: Colors.black87,
-      fontSize: 16.0,
-      height: 1.5,
-    );
-
-    Text userInfoText(String text) {
-      return Text(
-        text,
-        style: userInfoStyle,
-      );
-    }
-
-    Widget userStream = StreamBuilder(
+    return StreamBuilder(
       stream: db.getCurrentUserStream(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text("Something went wrong");
         } 
         else if (snapshot.hasData) {
-          Map<String, dynamic> data = snapshot.data.data();
-          Store preferredStore;
-          int userPoints = data['rankPoints'];
-          String userRank = DatabaseService(uid: auth.currentUser.uid)
-              .getUserRank(userPoints);
-          Icon icon = db.getRankIcon(userPoints);
 
-          if (data['preferredLocation'] != null) {
-            preferredStore = Store.storeFromMap(data['preferredLocation']);
-          }
+          TheUser user = db.createUserFromSnapshot(snapshot);
 
-          Widget padding = const Padding(padding: EdgeInsets.only(top: 2, bottom: 2),);
-
-          return ListView(
-            children: [
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Icon(
-                  Icons.account_circle,
-                  color: Colors.black,
-                  size: 50,
+          return new Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(
+                  height: _userPaneSize(context),
+                  child: DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    child: header(context, user, db),
+                  )
                 ),
-              ),
-              padding,
-              Container(
-                child: Row(
-                  children: <Widget>[
-                    userInfoText('${data['username']} '),
-                    icon,
-                  ],
+                ListTile(
+                  title: Row(
+                    children: <Widget>[
+                      Icon(Icons.edit_location),
+                      Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Text('Edit Location'),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UpdateLocation(
+                          preferredStore: user.preferredStore,
+                        )
+                      ),
+                    );
+                  },
                 ),
-              ),
-              padding,
-              Container(
-                child: userInfoText('Rank : $userRank'),
-              ),
-              padding,
-              Container(
-                child: preferredStore == null
-                  ? userInfoText('Store: $noPreferredStore')
-                  : userInfoText('Store: ${preferredStore.fullAddress}')
-              )
-            ],
+                ListTile(
+                    title: Row(
+                      children: <Widget>[
+                        Icon(Icons.edit),
+                        Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Text('Edit Username'),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UpdateUser()),
+                      );
+                    }),
+                ListTile(
+                  title: Row(
+                    children: <Widget>[
+                      Icon(Icons.person),
+                      Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Text('Sign Out'),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    await _auth.signout();
+                  },
+                ),
+              ],
+            ),
           );
         }
         else {
@@ -88,71 +101,58 @@ class SideDrawer extends StatelessWidget {
         }
       }
     );
+  }
 
-    return new Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          Container(
-              height: _userPaneSize(context),
-              child: DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                ),
-                child: userStream,
-              )),
-          ListTile(
-            title: Row(
-              children: <Widget>[
-                Icon(Icons.edit_location),
-                Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text('Edit Location'),
-                ),
-              ],
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => UpdateLocation(
-                          preferredStore: preferredStore,
-                        )),
-              );
-            },
+  Widget header(BuildContext context, TheUser user, DatabaseService db) {
+
+    int userPoints = user.rankPoints;
+    String userRank = db.getUserRank(userPoints);
+    Icon icon = db.getRankIcon(userPoints);
+
+    Widget padding = const Padding(padding: EdgeInsets.only(top: 2, bottom: 2),);
+    return ListView(
+      children: [
+        Container(
+          alignment: Alignment.centerLeft,
+          child: Icon(
+            Icons.account_circle,
+            color: Colors.black,
+            size: 50,
           ),
-          ListTile(
-              title: Row(
-                children: <Widget>[
-                  Icon(Icons.edit),
-                  Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Text('Edit Username'),
-                  ),
-                ],
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UpdateUser()),
-                );
-              }),
-          ListTile(
-            title: Row(
-              children: <Widget>[
-                Icon(Icons.person),
-                Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text('Sign Out'),
-                ),
-              ],
-            ),
-            onTap: () async {
-              await _auth.signout();
-            },
+        ),
+        padding,
+        Container(
+          child: Row(
+            children: <Widget>[
+              userInfoText('${user.username} '),
+              icon,
+            ],
           ),
-        ],
-      ),
+        ),
+        padding,
+        Container(
+          child: userInfoText('Rank : $userRank'),
+        ),
+        padding,
+        Container(
+          child: user.preferredStore == null
+            ? userInfoText('Store: $noPreferredStore')
+            : userInfoText('Store: ${user.preferredStore.fullAddress}')
+        )
+      ],
+    );
+  }
+
+  final TextStyle userInfoStyle = TextStyle(
+    color: Colors.black87,
+    fontSize: 16.0,
+    height: 1.5,
+  );
+
+  Text userInfoText(String text) {
+    return Text(
+      text,
+      style: userInfoStyle,
     );
   }
 }

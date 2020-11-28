@@ -73,7 +73,6 @@ class _StoreDropDownState extends State<_StoreDropDown> {
   List<Store> matchingStores;
   String submitMessage;
 
-  bool locationSaved = false;
   bool errorOccurred = false;
 
   static String saveSuccessMessage = 'Your location has been saved.';
@@ -123,8 +122,6 @@ class _StoreDropDownState extends State<_StoreDropDown> {
           generalAddressValue = newValue;
           matchingStores = allMatchingStores(generalAddressValue);
           storeAddressValue = matchingStores[0].nameWithStreetAddress;
-          locationSaved = false;
-          errorOccurred = false;
           setState(() {});
         }
       ),
@@ -150,8 +147,6 @@ class _StoreDropDownState extends State<_StoreDropDown> {
         ).toList(),
         onChanged: (String newValue) {
           setState(() {
-            locationSaved = false;
-            errorOccurred = false;
             storeAddressValue = newValue;
           });
         },
@@ -159,8 +154,9 @@ class _StoreDropDownState extends State<_StoreDropDown> {
       Padding(padding: EdgeInsets.all(10)),
       ElevatedButton(
         onPressed: () async {
-          locationSaved = false;
           errorOccurred = false;
+
+          Text message;
 
           Store newStore = getMatchingStore(storeAddressValue, generalAddressValue);
 
@@ -169,29 +165,24 @@ class _StoreDropDownState extends State<_StoreDropDown> {
           }
           else {
             await db.updateUserPreferredLocation(newStore)
-            .catchError((error) => errorOccurred = true);
-
-            if (!errorOccurred) {
-              locationSaved = true;
-            }
+            .catchError((error) {
+              errorOccurred = true;
+            });
           }
 
+          if (!errorOccurred) {
+            message = Text(saveSuccessMessage, style: TextStyle(color: Colors.green));
+          }
+          else {
+            message = Text(errorMessage, style: TextStyle(color: Colors.red));
+          }
+
+          Scaffold.of(context).showSnackBar(SnackBar(content: message));
           setState(() {});
         }, 
         child: Text('Save')
       )
     ];
-
-    if (locationSaved || errorOccurred) {
-
-      Text message;
-
-      locationSaved 
-      ? message = Text(saveSuccessMessage, style: TextStyle(color: Colors.green))
-      : message = Text(errorMessage, style: TextStyle(color: Colors.red));
-
-      columnChildren.add(message);
-    }
 
     return Padding(
       padding: const EdgeInsets.all(15.0),
